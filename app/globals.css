@@ -1,0 +1,293 @@
+@import "tailwindcss";
+
+:root {
+  --elf-bg-deep: #03111f;
+  --elf-bg: #061a2e;
+  --elf-card: #0b2540;
+  --elf-card-soft: #103456;
+  --elf-border: rgba(117, 170, 219, 0.22);
+  --elf-border-strong: rgba(117, 170, 219, 0.42);
+  --elf-sky: #75aadb;
+  --elf-sky-soft: #b9ddf5;
+  --elf-white: #ffffff;
+  --elf-muted: #dbeafe;
+  --elf-muted-2: #93a9bd;
+  --elf-gold: #f6d365;
+  --elf-red: #f87171;
+  --elf-green: #86efac;
+  --elf-purple: #c4b5fd;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(117, 170, 219, 0.18), transparent 34%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08), transparent 28%),
+    linear-gradient(180deg, var(--elf-bg-deep), var(--elf-bg));
+  color: var(--elf-white);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Genel form alanı */
+.input-style {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid var(--elf-border);
+  background: rgba(3, 17, 31, 0.88);
+  padding: 0.875rem 1rem;
+  color: white;
+  outline: none;
+}
+
+.input-style::placeholder {
+  color: rgba(219, 234, 254, 0.42);
+}
+
+.input-style:focus {
+  border-color: var(--elf-sky);
+  box-shadow: 0 0 0 4px rgba(117, 170, 219, 0.14);
+}
+
+.input-style option {
+  background: var(--elf-bg-deep);
+  color: white;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Tailwind neutral renklerini site genelinde Arjantin temasına çeviriyoruz */
+.bg-neutral-950 {
+  background-color: var(--elf-bg-deep) !important;
+}
+
+.bg-neutral-900 {
+  background-color: var(--elf-card) !important;
+}
+
+.bg-neutral-800 {
+  background-color: var(--elf-card-soft) !important;
+}
+
+.bg-neutral-900\/90 {
+  background-color: rgba(11, 37, 64, 0.9) !important;
+}
+
+.bg-neutral-950\/85,
+.bg-neutral-950\/95 {
+  background-color: rgba(3, 17, 31, 0.94) !important;
+}
+
+.bg-white {
+  background-color: var(--elf-white) !important;
+}
+
+.text-white {
+  color: var(--elf-white) !important;
+}
+
+.text-black {
+  color: #03111f !important;
+}
+
+.text-neutral-100,
+.text-neutral-200,
+.text-neutral-300 {
+  color: var(--elf-muted) !important;
+}
+
+.text-neutral-400 {
+  color: #b9cce0 !important;
+}
+
+.text-neutral-500 {
+  color: var(--elf-muted-2) !important;
+}
+
+.text-neutral-600 {
+  color: rgba(219, 234, 254, 0.42) !important;
+}
+
+.border-neutral-700,
+.border-neutral-800 {
+  border-color: var(--elf-border) !important;
+}
+
+.border-neutral-600 {
+  border-color: var(--elf-border-strong) !important;
+}
+
+/* Hover renkleri */
+.hover\:bg-neutral-900:hover {
+  background-color: rgba(16, 52, 86, 0.9) !important;
+}
+
+.hover\:bg-neutral-800:hover {
+  background-color: var(--elf-card-soft) !important;
+}
+
+.hover\:bg-neutral-200:hover {
+  background-color: var(--elf-sky-soft) !important;
+}
+
+.hover\:text-white:hover {
+  color: var(--elf-white) !important;
+}
+
+.hover\:text-neutral-300:hover {
+  color: var(--elf-sky-soft) !important;
+}
+
+/* Durum renklerini temaya yaklaştırıyoruz */
+.bg-blue-950 {
+  background-color: rgba(117, 170, 219, 0.18) !important;
+}
+
+.text-blue-300 {
+  color: var(--elf-sky-soft) !important;
+}
+
+.border-blue-800 {
+  border-color: rgba(117, 170, 219, 0.45) !important;
+}
+
+.bg-emerald-950 {
+  background-color: rgba(134, 239, 172, 0.16) !important;
+}
+
+.text-emerald-300 {
+  color: var(--elf-green) !important;
+}
+
+.border-emerald-800 {
+  border-color: rgba(134, 239, 172, 0.4) !important;
+}
+
+.bg-yellow-950 {
+  background-color: rgba(246, 211, 101, 0.16) !important;
+}
+
+.bg-yellow-950\/30,
+.bg-yellow-950\/40 {
+  background-color: rgba(246, 211, 101, 0.14) !important;
+}
+
+.text-yellow-100,
+.text-yellow-200,
+.text-yellow-300 {
+  color: var(--elf-gold) !important;
+}
+
+.border-yellow-700,
+.border-yellow-800,
+.border-yellow-900 {
+  border-color: rgba(246, 211, 101, 0.42) !important;
+}
+
+.bg-red-950 {
+  background-color: rgba(248, 113, 113, 0.16) !important;
+}
+
+.text-red-300 {
+  color: var(--elf-red) !important;
+}
+
+.border-red-800,
+.border-red-900 {
+  border-color: rgba(248, 113, 113, 0.42) !important;
+}
+
+.bg-purple-950 {
+  background-color: rgba(196, 181, 253, 0.16) !important;
+}
+
+.text-purple-300 {
+  color: var(--elf-purple) !important;
+}
+
+.border-purple-800 {
+  border-color: rgba(196, 181, 253, 0.42) !important;
+}
+
+/* Daha premium kart hissi */
+.rounded-\[2rem\],
+.rounded-\[2\.5rem\],
+.rounded-3xl {
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.16);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--elf-bg-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(117, 170, 219, 0.35);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(117, 170, 219, 0.55);
+}
+
+/* Takım kayan yazı */
+@keyframes tickerMove {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  animation: tickerMove 35s linear infinite;
+  will-change: transform;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
+}

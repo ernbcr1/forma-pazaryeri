@@ -85,18 +85,6 @@ export default function RootLayout({
           </header>
 
           <TeamTicker />
-
-          <div className="border-t border-neutral-800 bg-neutral-900 px-4 py-2 text-center text-xs leading-5 text-neutral-400 md:px-8">
-            <span className="font-bold text-white">Canlı Beta:</span>{" "}
-            elFormazione aktif geliştirme sürecindedir. İlanlar admin
-            kontrolünden geçebilir. Destek için{" "}
-            <a
-              href="mailto:elformazione1@gmail.com"
-              className="font-bold text-white hover:text-neutral-300"
-            >
-              elformazione1@gmail.com
-            </a>
-          </div>
         </div>
 
         {children}

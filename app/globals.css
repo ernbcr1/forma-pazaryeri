@@ -2,17 +2,23 @@
 
 :root {
   --elf-navy: #003366;
-  --elf-navy-dark: #001f3f;
-  --elf-navy-deep: #00152b;
-  --elf-navy-soft: #0a447a;
+  --elf-navy-900: #00264d;
+  --elf-navy-950: #001a33;
+  --elf-navy-990: #000f1f;
+
   --elf-white: #ffffff;
-  --elf-muted: #d9e6f2;
-  --elf-muted-2: #9fb7cc;
-  --elf-border: rgba(255, 255, 255, 0.16);
-  --elf-border-strong: rgba(255, 255, 255, 0.28);
-  --elf-gold: #f6d365;
-  --elf-red: #f87171;
+  --elf-ivory: #f7f4ef;
+  --elf-mist: #dce8f3;
+  --elf-muted: #9fb7cc;
+
+  --elf-gold: #c9a66b;
+  --elf-gold-soft: #ead8b5;
+
+  --elf-border: rgba(255, 255, 255, 0.14);
+  --elf-border-strong: rgba(255, 255, 255, 0.24);
+
   --elf-green: #86efac;
+  --elf-red: #f87171;
   --elf-purple: #c4b5fd;
 }
 
@@ -22,16 +28,27 @@
 
 html {
   scroll-behavior: smooth;
+  background: var(--elf-navy-990);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.1), transparent 30%),
-    radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.08), transparent 28%),
-    linear-gradient(180deg, var(--elf-navy), var(--elf-navy-deep));
+    radial-gradient(circle at 15% 0%, rgba(255, 255, 255, 0.12), transparent 26%),
+    radial-gradient(circle at 85% 8%, rgba(201, 166, 107, 0.14), transparent 24%),
+    radial-gradient(circle at 50% 90%, rgba(255, 255, 255, 0.06), transparent 30%),
+    linear-gradient(180deg, var(--elf-navy), var(--elf-navy-950) 52%, var(--elf-navy-990));
   color: var(--elf-white);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: var(--elf-gold);
+  color: var(--elf-navy-990);
 }
 
 a {
@@ -59,27 +76,46 @@ img {
   display: block;
 }
 
+h1,
+h2,
+h3 {
+  letter-spacing: -0.055em;
+}
+
+p {
+  letter-spacing: -0.015em;
+}
+
+/* Form alanları */
 .input-style {
   width: 100%;
-  border-radius: 1rem;
+  border-radius: 1.15rem;
   border: 1px solid var(--elf-border);
-  background: rgba(0, 31, 63, 0.88);
-  padding: 0.875rem 1rem;
+  background: rgba(0, 15, 31, 0.72);
+  padding: 0.95rem 1rem;
   color: var(--elf-white);
   outline: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
 }
 
 .input-style::placeholder {
-  color: rgba(217, 230, 242, 0.45);
+  color: rgba(220, 232, 243, 0.42);
 }
 
 .input-style:focus {
-  border-color: var(--elf-white);
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12);
+  border-color: rgba(201, 166, 107, 0.78);
+  background: rgba(0, 15, 31, 0.9);
+  box-shadow:
+    0 0 0 4px rgba(201, 166, 107, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .input-style option {
-  background: var(--elf-navy-dark);
+  background: var(--elf-navy-950);
   color: var(--elf-white);
 }
 
@@ -90,26 +126,27 @@ img {
   overflow: hidden;
 }
 
-/* Ana tema */
+/* Ana tema override */
 .bg-neutral-950 {
-  background-color: var(--elf-navy-deep) !important;
+  background-color: var(--elf-navy-990) !important;
 }
 
 .bg-neutral-900 {
-  background-color: var(--elf-navy) !important;
+  background:
+    linear-gradient(180deg, rgba(0, 51, 102, 0.96), rgba(0, 38, 77, 0.96)) !important;
 }
 
 .bg-neutral-800 {
-  background-color: var(--elf-navy-soft) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .bg-neutral-900\/90 {
-  background-color: rgba(0, 51, 102, 0.9) !important;
+  background-color: rgba(0, 38, 77, 0.9) !important;
 }
 
 .bg-neutral-950\/85,
 .bg-neutral-950\/95 {
-  background-color: rgba(0, 21, 43, 0.95) !important;
+  background-color: rgba(0, 15, 31, 0.92) !important;
 }
 
 .bg-white {
@@ -121,25 +158,25 @@ img {
 }
 
 .text-black {
-  color: var(--elf-navy-deep) !important;
+  color: var(--elf-navy-990) !important;
 }
 
 .text-neutral-100,
 .text-neutral-200,
 .text-neutral-300 {
-  color: var(--elf-white) !important;
+  color: var(--elf-ivory) !important;
 }
 
 .text-neutral-400 {
-  color: var(--elf-muted) !important;
+  color: var(--elf-mist) !important;
 }
 
 .text-neutral-500 {
-  color: var(--elf-muted-2) !important;
+  color: var(--elf-muted) !important;
 }
 
 .text-neutral-600 {
-  color: rgba(255, 255, 255, 0.42) !important;
+  color: rgba(220, 232, 243, 0.48) !important;
 }
 
 .border-neutral-700,
@@ -153,15 +190,15 @@ img {
 
 /* Hover */
 .hover\:bg-neutral-900:hover {
-  background-color: var(--elf-navy-soft) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .hover\:bg-neutral-800:hover {
-  background-color: #0d4d86 !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
 }
 
 .hover\:bg-neutral-200:hover {
-  background-color: #e6eef7 !important;
+  background-color: var(--elf-gold-soft) !important;
 }
 
 .hover\:text-white:hover {
@@ -169,12 +206,27 @@ img {
 }
 
 .hover\:text-neutral-300:hover {
-  color: var(--elf-white) !important;
+  color: var(--elf-gold-soft) !important;
+}
+
+/* Premium kart hissi */
+.rounded-\[2rem\],
+.rounded-\[2\.5rem\],
+.rounded-\[2\.75rem\],
+.rounded-3xl {
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+/* Kartların kenarlarını daha lüks gösterir */
+.border {
+  border-color: var(--elf-border);
 }
 
 /* Durum renkleri */
 .bg-blue-950 {
-  background-color: rgba(255, 255, 255, 0.14) !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
 }
 
 .text-blue-300 {
@@ -182,11 +234,11 @@ img {
 }
 
 .border-blue-800 {
-  border-color: rgba(255, 255, 255, 0.34) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
 .bg-emerald-950 {
-  background-color: rgba(134, 239, 172, 0.16) !important;
+  background-color: rgba(134, 239, 172, 0.14) !important;
 }
 
 .text-emerald-300 {
@@ -194,29 +246,29 @@ img {
 }
 
 .border-emerald-800 {
-  border-color: rgba(134, 239, 172, 0.4) !important;
+  border-color: rgba(134, 239, 172, 0.38) !important;
 }
 
 .bg-yellow-950,
 .bg-yellow-950\/30,
 .bg-yellow-950\/40 {
-  background-color: rgba(246, 211, 101, 0.16) !important;
+  background-color: rgba(201, 166, 107, 0.17) !important;
 }
 
 .text-yellow-100,
 .text-yellow-200,
 .text-yellow-300 {
-  color: var(--elf-gold) !important;
+  color: var(--elf-gold-soft) !important;
 }
 
 .border-yellow-700,
 .border-yellow-800,
 .border-yellow-900 {
-  border-color: rgba(246, 211, 101, 0.42) !important;
+  border-color: rgba(201, 166, 107, 0.48) !important;
 }
 
 .bg-red-950 {
-  background-color: rgba(248, 113, 113, 0.16) !important;
+  background-color: rgba(248, 113, 113, 0.14) !important;
 }
 
 .text-red-300 {
@@ -229,7 +281,7 @@ img {
 }
 
 .bg-purple-950 {
-  background-color: rgba(196, 181, 253, 0.16) !important;
+  background-color: rgba(196, 181, 253, 0.14) !important;
 }
 
 .text-purple-300 {
@@ -240,11 +292,25 @@ img {
   border-color: rgba(196, 181, 253, 0.42) !important;
 }
 
-/* Premium kart gölgesi */
-.rounded-\[2rem\],
-.rounded-\[2\.5rem\],
-.rounded-3xl {
-  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.18);
+/* Butonlara daha premium his */
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+.rounded-full {
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    opacity 180ms ease;
+}
+
+button:hover,
+.rounded-full:hover {
+  transform: translateY(-1px);
 }
 
 /* Scrollbar */
@@ -254,16 +320,16 @@ img {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--elf-navy-deep);
+  background: var(--elf-navy-990);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.24);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(201, 166, 107, 0.55);
 }
 
 /* Takım kayan yazı */

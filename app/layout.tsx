@@ -4,6 +4,7 @@ import "./globals.css";
 import AuthStatus from "./components/AuthStatus";
 import TeamTicker from "./components/TeamTicker";
 import MainNav from "./components/MainNav";
+import BrandLogo from "./components/BrandLogo";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://elformazione.com";
 
@@ -62,19 +63,8 @@ export default function RootLayout({
       <body className="bg-neutral-950 text-white antialiased">
         <div className="sticky top-0 z-50 border-b border-neutral-800 bg-neutral-950/95 backdrop-blur-xl">
           <header className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 md:px-8">
-            <Link href="/" className="flex shrink-0 items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-sm font-black text-black">
-                elF
-              </div>
-
-              <div className="hidden md:block">
-                <p className="text-base font-black leading-5 tracking-tight">
-                  elFormazione
-                </p>
-                <p className="text-[11px] text-neutral-500">
-                  Original football marketplace
-                </p>
-              </div>
+            <Link href="/" className="flex shrink-0 items-center">
+              <BrandLogo size="md" />
             </Link>
 
             <MainNav />
@@ -94,20 +84,7 @@ export default function RootLayout({
             <div className="rounded-[2.5rem] border border-neutral-800 bg-neutral-900 p-6 md:p-8 lg:p-10">
               <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr_0.9fr_0.9fr]">
                 <div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-sm font-black text-black">
-                      elF
-                    </div>
-
-                    <div>
-                      <p className="text-xl font-black leading-5">
-                        elFormazione
-                      </p>
-                      <p className="mt-1 text-xs text-neutral-500">
-                        Est. 2020 · Original football marketplace
-                      </p>
-                    </div>
-                  </div>
+                  <BrandLogo size="lg" />
 
                   <p className="mt-5 max-w-md text-sm leading-7 text-neutral-400">
                     elFormazione; orijinal forma, antrenman ürünü, krampon,

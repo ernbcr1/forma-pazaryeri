@@ -5,6 +5,7 @@ import AuthStatus from "./components/AuthStatus";
 import TeamTicker from "./components/TeamTicker";
 import MainNav from "./components/MainNav";
 import BrandLogo from "./components/BrandLogo";
+import SiteTracker from "./components/SiteTracker";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://elformazione.com";
 
@@ -61,6 +62,8 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <body className="bg-neutral-950 text-white antialiased">
+        <SiteTracker />
+
         <div className="sticky top-0 z-50 border-b border-neutral-800 bg-neutral-950/95 backdrop-blur-xl">
           <header className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 md:px-8">
             <Link href="/" className="flex shrink-0 items-center">

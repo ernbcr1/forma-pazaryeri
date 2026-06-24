@@ -11,13 +11,23 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://elformazione.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+
   title: {
     default: "elFormazione | Orijinal Futbol Ürünleri Pazarı",
     template: "%s | elFormazione",
   },
+
   description:
     "Orijinal forma, antrenman ürünü, krampon, atkı, aksesuar ve koleksiyon parçaları için kalite kontrollü futbol pazar yeri.",
+
   applicationName: "elFormazione",
+
+  icons: {
+    icon: "/elf-icon.png",
+    shortcut: "/elf-icon.png",
+    apple: "/elf-icon.png",
+  },
+
   keywords: [
     "forma",
     "orijinal forma",
@@ -28,11 +38,14 @@ export const metadata: Metadata = {
     "koleksiyon forma",
     "futbol pazarı",
     "forma pazarı",
+    "ikinci el forma",
     "elFormazione",
   ],
+
   authors: [{ name: "elFormazione" }],
   creator: "elFormazione",
   publisher: "elFormazione",
+
   openGraph: {
     title: "elFormazione | Orijinal Futbol Ürünleri Pazarı",
     description:
@@ -41,13 +54,24 @@ export const metadata: Metadata = {
     siteName: "elFormazione",
     locale: "tr_TR",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "elFormazione | Orijinal Futbol Ürünleri Pazarı",
+      },
+    ],
   },
+
   twitter: {
     card: "summary_large_image",
     title: "elFormazione | Orijinal Futbol Ürünleri Pazarı",
     description:
       "Orijinal forma, antrenman ürünü, krampon, atkı, aksesuar ve koleksiyon parçaları için kalite kontrollü futbol pazar yeri.",
+    images: ["/og-image.png"],
   },
+
   robots: {
     index: true,
     follow: true,

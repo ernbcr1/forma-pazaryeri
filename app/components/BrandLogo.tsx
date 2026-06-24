@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function BrandLogo({
   size = "md",
   showText = true,
@@ -8,30 +10,24 @@ export default function BrandLogo({
   const iconSize =
     size === "sm" ? "h-9 w-9" : size === "lg" ? "h-14 w-14" : "h-11 w-11";
 
+  const imageSize = size === "sm" ? 36 : size === "lg" ? 56 : 44;
+
   const textSize =
-    size === "sm"
-      ? "text-sm"
-      : size === "lg"
-        ? "text-2xl"
-        : "text-base";
+    size === "sm" ? "text-sm" : size === "lg" ? "text-2xl" : "text-base";
 
   return (
     <div className="flex items-center gap-3">
       <div
-        className={`${iconSize} relative flex shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white shadow-2xl`}
+        className={`${iconSize} relative flex shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white shadow-2xl`}
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(0,51,102,0.16),transparent_35%)]" />
-
-        <div className="relative flex items-center">
-          <span className="text-[22px] font-black leading-none tracking-[-0.14em] text-[#003366]">
-            e
-          </span>
-          <span className="-ml-1 text-[24px] font-black leading-none tracking-[-0.08em] text-[#003366]">
-            F
-          </span>
-        </div>
-
-        <div className="absolute bottom-1.5 left-1/2 h-[2px] w-5 -translate-x-1/2 rounded-full bg-[#003366]/45" />
+        <Image
+          src="/elf-icon.png"
+          alt="elFormazione logo"
+          width={imageSize}
+          height={imageSize}
+          className="h-full w-full object-cover"
+          priority
+        />
       </div>
 
       {showText && (

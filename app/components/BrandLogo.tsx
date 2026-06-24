@@ -21,7 +21,7 @@ export default function BrandLogo({
         className={`${iconSize} relative flex shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white shadow-2xl`}
       >
         <Image
-          src="/elf-icon.png"
+          src="/elf-icon.jpg"
           alt="elFormazione logo"
           width={imageSize}
           height={imageSize}
@@ -35,6 +35,7 @@ export default function BrandLogo({
           <p className={`${textSize} font-black leading-5 tracking-tight`}>
             elFormazione
           </p>
+
           <p className="mt-0.5 text-[11px] font-medium tracking-wide text-neutral-500">
             Original football marketplace
           </p>

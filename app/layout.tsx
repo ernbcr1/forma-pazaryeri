@@ -23,9 +23,9 @@ export const metadata: Metadata = {
   applicationName: "elFormazione",
 
   icons: {
-    icon: "/elf-icon.png",
-    shortcut: "/elf-icon.png",
-    apple: "/elf-icon.png",
+    icon: "/elf-icon.jpg",
+    shortcut: "/elf-icon.jpg",
+    apple: "/elf-icon.jpg",
   },
 
   keywords: [
@@ -39,6 +39,7 @@ export const metadata: Metadata = {
     "futbol pazarı",
     "forma pazarı",
     "ikinci el forma",
+    "koleksiyon forma",
     "elFormazione",
   ],
 
@@ -56,7 +57,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "elFormazione | Orijinal Futbol Ürünleri Pazarı",
@@ -69,7 +70,7 @@ export const metadata: Metadata = {
     title: "elFormazione | Orijinal Futbol Ürünleri Pazarı",
     description:
       "Orijinal forma, antrenman ürünü, krampon, atkı, aksesuar ve koleksiyon parçaları için kalite kontrollü futbol pazar yeri.",
-    images: ["/og-image.png"],
+    images: ["/og-image.jpg"],
   },
 
   robots: {

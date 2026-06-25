@@ -1,10 +1,13 @@
 import Link from "next/link";
+import AnnouncementBanner from "./components/AnnouncementBanner";
 
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#020713] text-white">
       <section className="px-4 py-8 md:px-8 md:py-14">
         <div className="mx-auto max-w-7xl">
+          <AnnouncementBanner placement="home" />
+
           <div className="relative overflow-hidden rounded-[2.75rem] border border-white/10 bg-[#050b18] shadow-[0_40px_120px_rgba(0,0,0,0.45)]">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(0,51,102,0.55),transparent_32%),radial-gradient(circle_at_90%_12%,rgba(201,166,107,0.18),transparent_28%),linear-gradient(135deg,rgba(255,255,255,0.06),transparent_32%)]" />
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#c9a66b]/70 to-transparent" />
@@ -112,8 +115,8 @@ export default function HomePage() {
                   <p>
                     elFormazione, futbol ürünlerini genel ilan kalabalığından
                     ayırır. Amaç; formaları, kramponları, atkıları, antrenman
-                    ürünlerini ve koleksiyon parçalarını daha sade, daha
-                    düzenli ve daha güven veren bir yapıda sunmaktır.
+                    ürünlerini ve koleksiyon parçalarını daha sade, daha düzenli
+                    ve daha güven veren bir yapıda sunmaktır.
                   </p>
 
                   <p>

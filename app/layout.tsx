@@ -23,9 +23,27 @@ export const metadata: Metadata = {
   applicationName: "elFormazione",
 
   icons: {
-    icon: "/elf-icon.jpg",
-    shortcut: "/elf-icon.jpg",
-    apple: "/elf-icon.jpg",
+    icon: [
+      {
+        url: "/icon?v=10",
+        type: "image/png",
+        sizes: "64x64",
+      },
+    ],
+    shortcut: [
+      {
+        url: "/icon?v=10",
+        type: "image/png",
+        sizes: "64x64",
+      },
+    ],
+    apple: [
+      {
+        url: "/apple-icon?v=10",
+        type: "image/png",
+        sizes: "180x180",
+      },
+    ],
   },
 
   keywords: [

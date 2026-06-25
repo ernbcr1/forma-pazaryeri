@@ -36,22 +36,21 @@ export default function AnnouncementBanner({
   async function loadAnnouncement() {
     setLoading(true);
 
-    const now = new Date().toISOString();
-
     const { data, error } = await supabase
       .from("announcements")
       .select("*")
       .eq("is_active", true)
       .in("placement", [placement, "global"])
-      .or(`starts_at.is.null,starts_at.lte.${now}`)
-      .or(`ends_at.is.null,ends_at.gte.${now}`)
       .order("priority", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (!error && data) {
-      setAnnouncement(data as Announcement);
+    if (error) {
+      console.error("Duyuru alınamadı:", error.message);
+      setAnnouncement(null);
+    } else {
+      setAnnouncement((data as Announcement) ?? null);
     }
 
     setLoading(false);

@@ -57,7 +57,6 @@ export const metadata: Metadata = {
     "futbol pazarı",
     "forma pazarı",
     "ikinci el forma",
-    "koleksiyon forma",
     "elFormazione",
   ],
 
@@ -128,7 +127,7 @@ export default function RootLayout({
         <footer className="border-t border-neutral-800 bg-neutral-950 px-4 py-10 md:px-8">
           <div className="mx-auto max-w-7xl">
             <div className="rounded-[2.5rem] border border-neutral-800 bg-neutral-900 p-6 md:p-8 lg:p-10">
-              <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr_0.9fr_0.9fr]">
+              <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr_0.8fr]">
                 <div>
                   <BrandLogo size="lg" />
 
@@ -163,6 +162,19 @@ export default function RootLayout({
                     { label: "İlan Ver", href: "/create-listing" },
                     { label: "Favorilerim", href: "/favorites" },
                     { label: "Profil", href: "/profile" },
+                  ]}
+                />
+
+                <FooterColumn
+                  title="Kategoriler"
+                  links={[
+                    { label: "Formalar", href: "/formalar" },
+                    { label: "Vintage Formalar", href: "/vintage-formalar" },
+                    { label: "Kramponlar", href: "/kramponlar" },
+                    {
+                      label: "Koleksiyon Formalar",
+                      href: "/koleksiyon-formalar",
+                    },
                   ]}
                 />
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AnnouncementBanner from "./components/AnnouncementBanner";
+import CategoryShowcase from "./components/CategoryShowcase";
 
 export default function HomePage() {
   return (
@@ -77,6 +78,8 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+
+          <CategoryShowcase />
 
           <section className="mt-6 grid gap-4 md:grid-cols-3">
             <StepCard

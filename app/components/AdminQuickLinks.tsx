@@ -2,35 +2,65 @@ import Link from "next/link";
 
 export default function AdminQuickLinks() {
   return (
-    <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <AdminCard
-        title="İlan Onay Paneli"
-        text="Bekleyen, onaylanan ve reddedilen ilanları yönet."
-        href="/admin"
-        label="Panele Git"
-      />
+    <section className="border-b border-white/10 bg-[#020713] px-4 py-6 text-white md:px-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#c9a66b]">
+              elFormazione Admin
+            </p>
 
-      <AdminCard
-        title="Duyurular"
-        text="Ana sayfa ve site geneli duyuruları ekle, pasifleştir veya sil."
-        href="/admin/announcements"
-        label="Duyuruları Yönet"
-      />
+            <h2 className="mt-2 text-2xl font-black tracking-[-0.055em] md:text-4xl">
+              Yönetim Kısayolları
+            </h2>
+          </div>
 
-      <AdminCard
-        title="Site İstatistikleri"
-        text="Online kullanıcı, ziyaret, sayfa görüntüleme ve site hareketlerini takip et."
-        href="/admin/analytics"
-        label="İstatistikleri Gör"
-      />
+          <Link
+            href="/"
+            className="w-fit rounded-full border border-white/15 px-5 py-3 text-sm font-black text-white transition hover:border-[#c9a66b]/50 hover:bg-white/[0.06]"
+          >
+            Siteyi Gör
+          </Link>
+        </div>
 
-      <AdminCard
-        title="Siteyi Gör"
-        text="Yaptığın değişikliklerin kullanıcı tarafında nasıl göründüğünü kontrol et."
-        href="/"
-        label="Ana Sayfaya Git"
-      />
-    </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <AdminCard
+            title="İlan Onay Paneli"
+            text="Bekleyen, onaylanan ve reddedilen ilanları yönet."
+            href="/admin"
+            label="Panele Git"
+          />
+
+          <AdminCard
+            title="Duyurular"
+            text="Ana sayfa ve site geneli duyuruları ekle, pasifleştir veya sil."
+            href="/admin/announcements"
+            label="Duyuruları Yönet"
+          />
+
+          <AdminCard
+            title="Kullanıcılar"
+            text="Kayıtlı kullanıcıları, ilan sayılarını ve hareketlerini takip et."
+            href="/admin/users"
+            label="Kullanıcıları Gör"
+          />
+
+          <AdminCard
+            title="Site İstatistikleri"
+            text="Online kullanıcı, ziyaret ve sayfa görüntülemelerini takip et."
+            href="/admin/analytics"
+            label="İstatistikleri Gör"
+          />
+
+          <AdminCard
+            title="Market"
+            text="Yayındaki ilanların kullanıcı tarafında nasıl göründüğünü kontrol et."
+            href="/listings"
+            label="Marketi Aç"
+          />
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -48,13 +78,13 @@ function AdminCard({
   return (
     <Link
       href={href}
-      className="group rounded-[2rem] border border-white/10 bg-[#050b18] p-6 shadow-[0_25px_80px_rgba(0,0,0,0.25)] transition hover:border-[#c9a66b]/50 hover:bg-white/[0.04]"
+      className="group rounded-[2rem] border border-white/10 bg-[#050b18] p-5 shadow-[0_25px_80px_rgba(0,0,0,0.25)] transition hover:border-[#c9a66b]/50 hover:bg-white/[0.04]"
     >
-      <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c9a66b]">
+      <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#c9a66b]">
         Admin
       </p>
 
-      <h3 className="mt-4 text-2xl font-black tracking-[-0.055em] text-white">
+      <h3 className="mt-4 text-xl font-black tracking-[-0.055em] text-white">
         {title}
       </h3>
 

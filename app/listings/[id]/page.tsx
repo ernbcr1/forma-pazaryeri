@@ -45,7 +45,10 @@ export default function ListingDetailPage() {
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [images, setImages] = useState<ListingImage[]>([]);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -58,6 +61,34 @@ export default function ListingDetailPage() {
   useEffect(() => {
     loadPage();
   }, [listingId]);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        closeLightbox();
+      }
+
+      if (event.key === "ArrowRight") {
+        showNextImage();
+      }
+
+      if (event.key === "ArrowLeft") {
+        showPreviousImage();
+      }
+    }
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [lightboxOpen, images.length, selectedImageIndex]);
+
+  const selectedImage = images[selectedImageIndex]?.image_url ?? null;
 
   async function loadPage() {
     if (!listingId) return;
@@ -80,7 +111,7 @@ export default function ListingDetailPage() {
     if (listingError || !listingData) {
       setListing(null);
       setImages([]);
-      setSelectedImage(null);
+      setSelectedImageIndex(0);
       setLoading(false);
       setMessage("İlan bulunamadı veya görüntüleme yetkin yok.");
       return;
@@ -98,7 +129,7 @@ export default function ListingDetailPage() {
     const typedImages = (imageData ?? []) as ListingImage[];
 
     setImages(typedImages);
-    setSelectedImage(typedImages[0]?.image_url ?? null);
+    setSelectedImageIndex(0);
 
     const { count } = await supabase
       .from("favorites")
@@ -131,18 +162,43 @@ export default function ListingDetailPage() {
     if (!listing?.price) return "Fiyat belirtilmedi";
 
     const numericPrice =
-      typeof listing.price === "number"
-        ? listing.price
-        : Number(listing.price);
+      typeof listing.price === "number" ? listing.price : Number(listing.price);
 
     if (!Number.isFinite(numericPrice)) {
       return `${listing.price} ${listing.currency || "TL"}`;
     }
 
-    return `${numericPrice.toLocaleString("tr-TR")} ${
-      listing.currency || "TL"
-    }`;
+    return `${numericPrice.toLocaleString("tr-TR")} ${listing.currency || "TL"}`;
   }, [listing]);
+
+  function openLightbox(index: number) {
+    setSelectedImageIndex(index);
+    setZoomed(false);
+    setLightboxOpen(true);
+  }
+
+  function closeLightbox() {
+    setLightboxOpen(false);
+    setZoomed(false);
+  }
+
+  function showNextImage() {
+    if (images.length <= 1) return;
+
+    setZoomed(false);
+    setSelectedImageIndex((current) =>
+      current + 1 >= images.length ? 0 : current + 1
+    );
+  }
+
+  function showPreviousImage() {
+    if (images.length <= 1) return;
+
+    setZoomed(false);
+    setSelectedImageIndex((current) =>
+      current - 1 < 0 ? images.length - 1 : current - 1
+    );
+  }
 
   async function toggleFavorite() {
     if (!listing) return;
@@ -289,6 +345,7 @@ export default function ListingDetailPage() {
         ...listing,
         status: nextStatus,
       });
+
       setMessage(
         nextStatus === "sold"
           ? "İlan satıldı olarak işaretlendi."
@@ -316,7 +373,8 @@ export default function ListingDetailPage() {
           <h1 className="text-3xl font-black">İlan bulunamadı</h1>
 
           <p className="mt-4 text-sm leading-7 text-neutral-400">
-            {message || "Bu ilan silinmiş, yayından kaldırılmış veya erişime kapatılmış olabilir."}
+            {message ||
+              "Bu ilan silinmiş, yayından kaldırılmış veya erişime kapatılmış olabilir."}
           </p>
 
           <Link
@@ -358,12 +416,11 @@ export default function ListingDetailPage() {
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
             {selectedImage ? (
-              <a
-                href={selectedImage}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative block aspect-[4/5] overflow-hidden rounded-[2rem] border border-neutral-800 bg-neutral-950"
-                title="Fotoğrafı tam boy aç"
+              <button
+                type="button"
+                onClick={() => openLightbox(selectedImageIndex)}
+                className="relative block aspect-[4/5] w-full overflow-hidden rounded-[2rem] border border-neutral-800 bg-neutral-950 text-left"
+                title="Fotoğrafı büyüt"
               >
                 <img
                   src={selectedImage}
@@ -372,9 +429,9 @@ export default function ListingDetailPage() {
                 />
 
                 <div className="pointer-events-none absolute bottom-4 right-4 rounded-full bg-black/65 px-4 py-2 text-xs font-bold text-white backdrop-blur">
-                  Tam boy aç
+                  🔍 Büyüt
                 </div>
-              </a>
+              </button>
             ) : (
               <div className="flex aspect-[4/5] items-center justify-center rounded-[2rem] border border-neutral-800 bg-neutral-900 text-neutral-500">
                 Fotoğraf yok
@@ -383,12 +440,12 @@ export default function ListingDetailPage() {
 
             {images.length > 1 && (
               <div className="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-5 md:grid-cols-6">
-                {images.map((image) => (
+                {images.map((image, index) => (
                   <button
                     key={image.id}
-                    onClick={() => setSelectedImage(image.image_url)}
+                    onClick={() => setSelectedImageIndex(index)}
                     className={`aspect-square overflow-hidden rounded-2xl border bg-neutral-950 ${
-                      selectedImage === image.image_url
+                      selectedImageIndex === index
                         ? "border-white"
                         : "border-neutral-800"
                     }`}
@@ -529,6 +586,102 @@ export default function ListingDetailPage() {
           </div>
         </div>
       </section>
+
+      {lightboxOpen && selectedImage && (
+        <div className="fixed inset-0 z-[100] bg-black/90 px-4 py-5 backdrop-blur-md">
+          <div className="mx-auto flex h-full max-w-7xl flex-col">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-black text-white">
+                  {listing.title}
+                </p>
+
+                <p className="mt-1 text-xs text-neutral-400">
+                  Fotoğraf {selectedImageIndex + 1} / {images.length}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setZoomed((current) => !current)}
+                  className="rounded-full border border-white/15 px-4 py-2 text-sm font-black text-white hover:bg-white/10"
+                >
+                  {zoomed ? "Uzaklaştır" : "🔍 Büyüt"}
+                </button>
+
+                <button
+                  onClick={closeLightbox}
+                  className="rounded-full bg-white px-4 py-2 text-sm font-black text-black hover:bg-neutral-200"
+                >
+                  Kapat
+                </button>
+              </div>
+            </div>
+
+            <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-black">
+              {images.length > 1 && (
+                <button
+                  onClick={showPreviousImage}
+                  className="absolute left-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-2xl font-black text-black hover:bg-white md:left-5"
+                  title="Önceki fotoğraf"
+                >
+                  ‹
+                </button>
+              )}
+
+              <div className="h-full w-full overflow-auto">
+                <div className="flex min-h-full min-w-full items-center justify-center p-4">
+                  <img
+                    src={selectedImage}
+                    alt={listing.title}
+                    className={`max-h-[78vh] max-w-full object-contain transition duration-200 ${
+                      zoomed
+                        ? "scale-150 cursor-zoom-out"
+                        : "scale-100 cursor-zoom-in"
+                    }`}
+                    onClick={() => setZoomed((current) => !current)}
+                  />
+                </div>
+              </div>
+
+              {images.length > 1 && (
+                <button
+                  onClick={showNextImage}
+                  className="absolute right-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-2xl font-black text-black hover:bg-white md:right-5"
+                  title="Sonraki fotoğraf"
+                >
+                  ›
+                </button>
+              )}
+            </div>
+
+            {images.length > 1 && (
+              <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
+                {images.map((image, index) => (
+                  <button
+                    key={image.id}
+                    onClick={() => {
+                      setSelectedImageIndex(index);
+                      setZoomed(false);
+                    }}
+                    className={`h-20 w-20 shrink-0 overflow-hidden rounded-2xl border bg-neutral-950 ${
+                      selectedImageIndex === index
+                        ? "border-white"
+                        : "border-white/15"
+                    }`}
+                  >
+                    <img
+                      src={image.image_url}
+                      alt={listing.title}
+                      className="h-full w-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
@@ -546,9 +699,7 @@ function InfoBox({
         {label}
       </p>
 
-      <p className="mt-2 text-sm font-bold text-neutral-200">
-        {value || "-"}
-      </p>
+      <p className="mt-2 text-sm font-bold text-neutral-200">{value || "-"}</p>
     </div>
   );
 }

@@ -49,6 +49,10 @@ export default function ListingDetailPage() {
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [zoomed, setZoomed] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({
+    x: 50,
+    y: 50,
+  });
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -174,18 +178,30 @@ export default function ListingDetailPage() {
   function openLightbox(index: number) {
     setSelectedImageIndex(index);
     setZoomed(false);
+    setZoomPosition({
+      x: 50,
+      y: 50,
+    });
     setLightboxOpen(true);
   }
 
   function closeLightbox() {
     setLightboxOpen(false);
     setZoomed(false);
+    setZoomPosition({
+      x: 50,
+      y: 50,
+    });
   }
 
   function showNextImage() {
     if (images.length <= 1) return;
 
     setZoomed(false);
+    setZoomPosition({
+      x: 50,
+      y: 50,
+    });
     setSelectedImageIndex((current) =>
       current + 1 >= images.length ? 0 : current + 1
     );
@@ -195,9 +211,25 @@ export default function ListingDetailPage() {
     if (images.length <= 1) return;
 
     setZoomed(false);
+    setZoomPosition({
+      x: 50,
+      y: 50,
+    });
     setSelectedImageIndex((current) =>
       current - 1 < 0 ? images.length - 1 : current - 1
     );
+  }
+
+  function handleZoomMove(event: React.MouseEvent<HTMLImageElement>) {
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+    setZoomPosition({
+      x: Math.max(0, Math.min(100, x)),
+      y: Math.max(0, Math.min(100, y)),
+    });
   }
 
   async function toggleFavorite() {
@@ -429,7 +461,7 @@ export default function ListingDetailPage() {
                 />
 
                 <div className="pointer-events-none absolute bottom-4 right-4 rounded-full bg-black/65 px-4 py-2 text-xs font-bold text-white backdrop-blur">
-                  🔍 Büyüt
+                  🔍 İncele
                 </div>
               </button>
             ) : (
@@ -592,9 +624,7 @@ export default function ListingDetailPage() {
           <div className="mx-auto flex h-full max-w-7xl flex-col">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-black text-white">
-                  {listing.title}
-                </p>
+                <p className="text-sm font-black text-white">{listing.title}</p>
 
                 <p className="mt-1 text-xs text-neutral-400">
                   Fotoğraf {selectedImageIndex + 1} / {images.length}
@@ -603,10 +633,16 @@ export default function ListingDetailPage() {
 
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => setZoomed((current) => !current)}
+                  onClick={() => {
+                    setZoomed((current) => !current);
+                    setZoomPosition({
+                      x: 50,
+                      y: 50,
+                    });
+                  }}
                   className="rounded-full border border-white/15 px-4 py-2 text-sm font-black text-white hover:bg-white/10"
                 >
-                  {zoomed ? "Uzaklaştır" : "🔍 Büyüt"}
+                  {zoomed ? "Uzaklaştır" : "🔍 Bölgesel Büyüt"}
                 </button>
 
                 <button
@@ -634,12 +670,15 @@ export default function ListingDetailPage() {
                   <img
                     src={selectedImage}
                     alt={listing.title}
-                    className={`max-h-[78vh] max-w-full object-contain transition duration-200 ${
-                      zoomed
-                        ? "scale-150 cursor-zoom-out"
-                        : "scale-100 cursor-zoom-in"
-                    }`}
+                    onMouseMove={handleZoomMove}
                     onClick={() => setZoomed((current) => !current)}
+                    className={`max-h-[78vh] max-w-full object-contain transition-transform duration-150 ${
+                      zoomed ? "cursor-zoom-out" : "cursor-zoom-in"
+                    }`}
+                    style={{
+                      transform: zoomed ? "scale(2.35)" : "scale(1)",
+                      transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                    }}
                   />
                 </div>
               </div>
@@ -663,6 +702,10 @@ export default function ListingDetailPage() {
                     onClick={() => {
                       setSelectedImageIndex(index);
                       setZoomed(false);
+                      setZoomPosition({
+                        x: 50,
+                        y: 50,
+                      });
                     }}
                     className={`h-20 w-20 shrink-0 overflow-hidden rounded-2xl border bg-neutral-950 ${
                       selectedImageIndex === index
@@ -678,6 +721,13 @@ export default function ListingDetailPage() {
                   </button>
                 ))}
               </div>
+            )}
+
+            {zoomed && (
+              <p className="mt-3 text-center text-xs text-neutral-400">
+                İmleci fotoğraf üzerinde gezdirerek arma, etiket, dikiş ve baskı
+                detaylarını bölgesel olarak inceleyebilirsin.
+              </p>
             )}
           </div>
         </div>

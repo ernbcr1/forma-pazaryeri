@@ -1,27 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap");
 @import "tailwindcss";
 
 :root {
-  --elf-ink: #020713;
-  --elf-ink-2: #050b18;
-  --elf-ink-3: #08111f;
+  --elf-ink: #111827;
+  --elf-ink-soft: #1f2937;
 
-  --elf-navy: #003366;
-  --elf-navy-soft: #0b3f75;
+  --elf-page: #f7f3ea;
+  --elf-page-2: #fbfaf6;
+  --elf-card: #ffffff;
+  --elf-card-soft: #f3eee3;
 
-  --elf-white: #ffffff;
-  --elf-ivory: #f8f5ee;
-  --elf-mist: #d8e2ee;
-  --elf-muted: #8ea3b8;
+  --elf-navy: #071a33;
+  --elf-navy-soft: #102a4c;
 
-  --elf-gold: #c9a66b;
+  --elf-gold: #b9975b;
   --elf-gold-soft: #ead8b5;
+  --elf-champagne: #f0e5cf;
 
-  --elf-border: rgba(255, 255, 255, 0.12);
-  --elf-border-strong: rgba(201, 166, 107, 0.36);
+  --elf-muted: #6b7280;
+  --elf-muted-2: #9ca3af;
 
-  --elf-green: #86efac;
-  --elf-red: #f87171;
-  --elf-purple: #c4b5fd;
+  --elf-border: rgba(17, 24, 39, 0.12);
+  --elf-border-strong: rgba(185, 151, 91, 0.42);
+
+  --elf-green: #047857;
+  --elf-red: #b91c1c;
+  --elf-blue: #1d4ed8;
+  --elf-yellow: #a16207;
+  --elf-purple: #6d28d9;
 }
 
 * {
@@ -30,27 +36,32 @@
 
 html {
   scroll-behavior: smooth;
-  background: var(--elf-ink);
+  background: var(--elf-page);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 0%, rgba(0, 51, 102, 0.35), transparent 28%),
-    radial-gradient(circle at 88% 8%, rgba(201, 166, 107, 0.14), transparent 22%),
-    radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.035), transparent 34%),
-    linear-gradient(180deg, #020713 0%, #050b18 44%, #020713 100%);
-  color: var(--elf-white);
+    radial-gradient(circle at 12% 0%, rgba(185, 151, 91, 0.18), transparent 28%),
+    radial-gradient(circle at 88% 5%, rgba(7, 26, 51, 0.12), transparent 24%),
+    linear-gradient(180deg, #fbfaf6 0%, #f7f3ea 46%, #f2ebdd 100%);
+  color: var(--elf-ink);
   font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Manrope",
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
     sans-serif;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.012em;
 }
 
 ::selection {
   background: var(--elf-gold);
-  color: var(--elf-ink);
+  color: #ffffff;
 }
 
 a {
@@ -81,25 +92,25 @@ img {
 h1,
 h2,
 h3 {
-  letter-spacing: -0.06em;
+  letter-spacing: -0.045em;
 }
 
 p {
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
 }
 
 /* Form alanları */
 .input-style {
   width: 100%;
   border-radius: 1.1rem;
-  border: 1px solid var(--elf-border);
-  background: rgba(2, 7, 19, 0.86);
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  background: rgba(255, 255, 255, 0.88);
   padding: 0.95rem 1rem;
-  color: var(--elf-white);
+  color: var(--elf-ink);
   outline: none;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.035),
-    0 18px 55px rgba(0, 0, 0, 0.18);
+    0 12px 35px rgba(17, 24, 39, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
@@ -107,20 +118,20 @@ p {
 }
 
 .input-style::placeholder {
-  color: rgba(216, 226, 238, 0.42);
+  color: rgba(107, 114, 128, 0.72);
 }
 
 .input-style:focus {
-  border-color: rgba(201, 166, 107, 0.78);
-  background: rgba(2, 7, 19, 0.94);
+  border-color: rgba(185, 151, 91, 0.78);
+  background: #ffffff;
   box-shadow:
-    0 0 0 4px rgba(201, 166, 107, 0.11),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 0 0 4px rgba(185, 151, 91, 0.13),
+    0 18px 45px rgba(17, 24, 39, 0.08);
 }
 
 .input-style option {
-  background: var(--elf-ink);
-  color: var(--elf-white);
+  background: #ffffff;
+  color: var(--elf-ink);
 }
 
 .line-clamp-2 {
@@ -130,35 +141,35 @@ p {
   overflow: hidden;
 }
 
-/* Tailwind renklerini ultra premium palete çeviriyoruz */
+/* Genel siteyi açık premium stile çevirir */
 .bg-neutral-950 {
-  background-color: var(--elf-ink) !important;
+  background-color: var(--elf-page) !important;
 }
 
 .bg-neutral-900 {
   background:
-    linear-gradient(180deg, rgba(8, 17, 31, 0.98), rgba(5, 11, 24, 0.98)) !important;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 245, 238, 0.96)) !important;
 }
 
 .bg-neutral-800 {
-  background-color: rgba(255, 255, 255, 0.07) !important;
+  background-color: rgba(17, 24, 39, 0.06) !important;
 }
 
 .bg-neutral-900\/90 {
-  background-color: rgba(8, 17, 31, 0.9) !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .bg-neutral-950\/85,
 .bg-neutral-950\/95 {
-  background-color: rgba(2, 7, 19, 0.94) !important;
+  background-color: rgba(251, 250, 246, 0.88) !important;
 }
 
 .bg-white {
-  background-color: var(--elf-white) !important;
+  background-color: #ffffff !important;
 }
 
 .text-white {
-  color: var(--elf-white) !important;
+  color: var(--elf-ink) !important;
 }
 
 .text-black {
@@ -168,11 +179,11 @@ p {
 .text-neutral-100,
 .text-neutral-200,
 .text-neutral-300 {
-  color: var(--elf-ivory) !important;
+  color: var(--elf-ink-soft) !important;
 }
 
 .text-neutral-400 {
-  color: var(--elf-mist) !important;
+  color: var(--elf-muted) !important;
 }
 
 .text-neutral-500 {
@@ -180,7 +191,7 @@ p {
 }
 
 .text-neutral-600 {
-  color: rgba(216, 226, 238, 0.46) !important;
+  color: var(--elf-muted-2) !important;
 }
 
 .border-neutral-700,
@@ -189,71 +200,78 @@ p {
 }
 
 .border-neutral-600 {
-  border-color: rgba(255, 255, 255, 0.22) !important;
+  border-color: rgba(17, 24, 39, 0.2) !important;
 }
 
-/* Premium hover */
+/* Header daha cam/premium dursun */
+.sticky.bg-neutral-950\/95,
+.sticky .bg-neutral-950\/95 {
+  background-color: rgba(251, 250, 246, 0.84) !important;
+  box-shadow: 0 18px 55px rgba(17, 24, 39, 0.08);
+}
+
+/* Hover */
 .hover\:bg-neutral-900:hover {
-  background-color: rgba(255, 255, 255, 0.075) !important;
+  background-color: rgba(255, 255, 255, 0.82) !important;
 }
 
 .hover\:bg-neutral-800:hover {
-  background-color: rgba(255, 255, 255, 0.11) !important;
+  background-color: rgba(17, 24, 39, 0.06) !important;
 }
 
 .hover\:bg-neutral-200:hover {
-  background-color: var(--elf-gold-soft) !important;
+  background-color: var(--elf-champagne) !important;
 }
 
 .hover\:text-white:hover {
-  color: var(--elf-white) !important;
+  color: var(--elf-navy) !important;
 }
 
 .hover\:text-neutral-300:hover {
-  color: var(--elf-gold-soft) !important;
+  color: var(--elf-gold) !important;
 }
 
-/* Beyaz butonları premium yap */
+/* Beyaz butonları premium krem yap */
 .bg-white.text-black,
 a.bg-white,
 button.bg-white {
   background:
-    linear-gradient(180deg, #ffffff, #efe6d4) !important;
-  color: var(--elf-ink) !important;
+    linear-gradient(180deg, #111827, #071a33) !important;
+  color: #ffffff !important;
   box-shadow:
-    0 18px 45px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 18px 45px rgba(7, 26, 51, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
-/* Kart premium hissi */
+/* Kartlar artık daha hafif */
 .rounded-\[2rem\],
 .rounded-\[2\.5rem\],
 .rounded-\[2\.75rem\],
 .rounded-3xl {
   box-shadow:
-    0 28px 90px rgba(0, 0, 0, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+    0 24px 70px rgba(17, 24, 39, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 .border {
   border-color: var(--elf-border);
 }
 
-/* Rozet / durum renkleri */
+/* Rozet renkleri */
 .bg-blue-950 {
-  background-color: rgba(0, 51, 102, 0.42) !important;
+  background-color: rgba(29, 78, 216, 0.08) !important;
 }
 
 .text-blue-300 {
-  color: var(--elf-mist) !important;
+  color: var(--elf-blue) !important;
 }
 
 .border-blue-800 {
-  border-color: rgba(0, 51, 102, 0.65) !important;
+  border-color: rgba(29, 78, 216, 0.24) !important;
 }
 
 .bg-emerald-950 {
-  background-color: rgba(134, 239, 172, 0.12) !important;
+  background-color: rgba(4, 120, 87, 0.08) !important;
 }
 
 .text-emerald-300 {
@@ -261,29 +279,29 @@ button.bg-white {
 }
 
 .border-emerald-800 {
-  border-color: rgba(134, 239, 172, 0.36) !important;
+  border-color: rgba(4, 120, 87, 0.24) !important;
 }
 
 .bg-yellow-950,
 .bg-yellow-950\/30,
 .bg-yellow-950\/40 {
-  background-color: rgba(201, 166, 107, 0.16) !important;
+  background-color: rgba(185, 151, 91, 0.14) !important;
 }
 
 .text-yellow-100,
 .text-yellow-200,
 .text-yellow-300 {
-  color: var(--elf-gold-soft) !important;
+  color: var(--elf-yellow) !important;
 }
 
 .border-yellow-700,
 .border-yellow-800,
 .border-yellow-900 {
-  border-color: rgba(201, 166, 107, 0.48) !important;
+  border-color: rgba(185, 151, 91, 0.34) !important;
 }
 
 .bg-red-950 {
-  background-color: rgba(248, 113, 113, 0.13) !important;
+  background-color: rgba(185, 28, 28, 0.08) !important;
 }
 
 .text-red-300 {
@@ -292,11 +310,11 @@ button.bg-white {
 
 .border-red-800,
 .border-red-900 {
-  border-color: rgba(248, 113, 113, 0.4) !important;
+  border-color: rgba(185, 28, 28, 0.24) !important;
 }
 
 .bg-purple-950 {
-  background-color: rgba(196, 181, 253, 0.13) !important;
+  background-color: rgba(109, 40, 217, 0.08) !important;
 }
 
 .text-purple-300 {
@@ -304,10 +322,10 @@ button.bg-white {
 }
 
 .border-purple-800 {
-  border-color: rgba(196, 181, 253, 0.4) !important;
+  border-color: rgba(109, 40, 217, 0.24) !important;
 }
 
-/* Link / buton animasyonu */
+/* Animasyon */
 button,
 a {
   -webkit-tap-highlight-color: transparent;
@@ -336,16 +354,16 @@ button:hover,
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--elf-ink);
+  background: #f7f3ea;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(17, 24, 39, 0.18);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(201, 166, 107, 0.55);
+  background: rgba(185, 151, 91, 0.65);
 }
 
 /* Takım kayan yazı */
@@ -366,4 +384,23 @@ button:hover,
 
 .ticker-track:hover {
   animation-play-state: paused;
+}
+
+/* Modal ve lightbox gibi alanlarda koyu renkleri korumak için */
+.elf-dark-area,
+.elf-dark-area * {
+  color: #ffffff !important;
+}
+
+.elf-dark-area .text-neutral-400 {
+  color: rgba(255, 255, 255, 0.66) !important;
+}
+
+.elf-dark-area .text-neutral-500 {
+  color: rgba(255, 255, 255, 0.48) !important;
+}
+
+.elf-dark-area button.bg-white {
+  background: #ffffff !important;
+  color: #111827 !important;
 }

@@ -18,7 +18,7 @@ export default function BrandLogo({
   return (
     <div className="flex items-center gap-3">
       <div
-        className={`${iconSize} relative flex shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white shadow-2xl`}
+        className={`${iconSize} relative flex shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#07111f]/10 bg-white shadow-[0_14px_35px_rgba(7,17,31,0.10)]`}
       >
         <Image
           src="/elf-icon.jpg"
@@ -32,11 +32,13 @@ export default function BrandLogo({
 
       {showText && (
         <div className="hidden md:block">
-          <p className={`${textSize} font-black leading-5 tracking-tight`}>
+          <p
+            className={`${textSize} font-black leading-5 tracking-[-0.045em] text-[#07111f]`}
+          >
             elFormazione
           </p>
 
-          <p className="mt-0.5 text-[11px] font-medium tracking-wide text-neutral-500">
+          <p className="mt-1 text-[11px] font-black tracking-[-0.01em] text-[#0b1d35]/75">
             Original football marketplace
           </p>
         </div>

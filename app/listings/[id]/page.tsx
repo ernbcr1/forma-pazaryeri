@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { MouseEvent } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
@@ -178,30 +179,21 @@ export default function ListingDetailPage() {
   function openLightbox(index: number) {
     setSelectedImageIndex(index);
     setZoomed(false);
-    setZoomPosition({
-      x: 50,
-      y: 50,
-    });
+    setZoomPosition({ x: 50, y: 50 });
     setLightboxOpen(true);
   }
 
   function closeLightbox() {
     setLightboxOpen(false);
     setZoomed(false);
-    setZoomPosition({
-      x: 50,
-      y: 50,
-    });
+    setZoomPosition({ x: 50, y: 50 });
   }
 
   function showNextImage() {
     if (images.length <= 1) return;
 
     setZoomed(false);
-    setZoomPosition({
-      x: 50,
-      y: 50,
-    });
+    setZoomPosition({ x: 50, y: 50 });
     setSelectedImageIndex((current) =>
       current + 1 >= images.length ? 0 : current + 1
     );
@@ -211,16 +203,13 @@ export default function ListingDetailPage() {
     if (images.length <= 1) return;
 
     setZoomed(false);
-    setZoomPosition({
-      x: 50,
-      y: 50,
-    });
+    setZoomPosition({ x: 50, y: 50 });
     setSelectedImageIndex((current) =>
       current - 1 < 0 ? images.length - 1 : current - 1
     );
   }
 
-  function handleZoomMove(event: React.MouseEvent<HTMLImageElement>) {
+  function handleZoomMove(event: MouseEvent<HTMLImageElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
 
     const x = ((event.clientX - rect.left) / rect.width) * 100;
@@ -364,9 +353,7 @@ export default function ListingDetailPage() {
 
     const { error } = await supabase
       .from("listings")
-      .update({
-        status: nextStatus,
-      })
+      .update({ status: nextStatus })
       .eq("id", listing.id)
       .eq("user_id", currentUserId);
 
@@ -390,9 +377,9 @@ export default function ListingDetailPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#f7f3ea] px-4 py-10 text-[#111827] md:px-8">
+      <main className="min-h-screen bg-[#f6f1e8] px-4 py-10 text-[#07111f] md:px-8">
         <section className="mx-auto max-w-7xl">
-          <p className="text-sm font-semibold text-[#6b7280]">
+          <p className="text-sm font-semibold text-[#667085]">
             İlan yükleniyor...
           </p>
         </section>
@@ -402,20 +389,20 @@ export default function ListingDetailPage() {
 
   if (!listing) {
     return (
-      <main className="min-h-screen bg-[#f7f3ea] px-4 py-10 text-[#111827] md:px-8">
-        <section className="mx-auto max-w-3xl rounded-[2rem] border border-[#111827]/10 bg-white p-8 shadow-[0_24px_70px_rgba(17,24,39,0.08)]">
+      <main className="min-h-screen bg-[#f6f1e8] px-4 py-10 text-[#07111f] md:px-8">
+        <section className="mx-auto max-w-3xl rounded-[2rem] border border-[#07111f]/10 bg-[#fffdf8] p-8 shadow-[0_24px_70px_rgba(7,17,31,0.08)]">
           <h1 className="text-3xl font-black tracking-[-0.045em]">
             İlan bulunamadı
           </h1>
 
-          <p className="mt-4 text-sm leading-7 text-[#6b7280]">
+          <p className="mt-4 text-sm leading-7 text-[#667085]">
             {message ||
               "Bu ilan silinmiş, yayından kaldırılmış veya erişime kapatılmış olabilir."}
           </p>
 
           <Link
             href="/listings"
-            className="mt-6 inline-flex rounded-full bg-[#111827] px-6 py-3 text-sm font-black text-white hover:bg-[#071a33]"
+            className="mt-6 inline-flex rounded-full bg-[#07111f] px-6 py-3 text-sm font-black text-white hover:bg-[#0b1d35]"
           >
             Markete Dön
           </Link>
@@ -425,12 +412,12 @@ export default function ListingDetailPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f3ea] px-4 py-8 text-[#111827] md:px-8">
+    <main className="min-h-screen bg-[#f6f1e8] px-4 py-8 text-[#07111f] md:px-8">
       <section className="mx-auto max-w-7xl">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <Link
             href="/listings"
-            className="w-fit rounded-full border border-[#111827]/10 bg-white px-5 py-3 text-sm font-bold text-[#374151] shadow-sm hover:border-[#b9975b]/40 hover:bg-[#fbfaf6]"
+            className="w-fit rounded-full border border-[#07111f]/10 bg-[#fffdf8] px-5 py-3 text-sm font-black text-[#0b1d35] shadow-sm hover:border-[#c7a15a]/50 hover:bg-white"
           >
             ← Markete Dön
           </Link>
@@ -438,26 +425,36 @@ export default function ListingDetailPage() {
           <div className="flex flex-wrap gap-2">
             <StatusBadge status={listing.status} />
 
-            <span className="rounded-full border border-[#111827]/10 bg-white px-4 py-2 text-xs font-bold text-[#6b7280] shadow-sm">
-              {favoriteCount} favori
+            <span className="rounded-full border border-[#07111f]/10 bg-[#fffdf8] px-4 py-2 text-xs font-black text-[#667085] shadow-sm">
+              ♡ {favoriteCount}
             </span>
           </div>
         </div>
 
         {message && (
-          <div className="mb-6 rounded-2xl border border-[#b9975b]/30 bg-[#fff8e7] p-4 text-sm font-semibold text-[#7c5c1f]">
+          <div className="mb-6 rounded-2xl border border-[#c7a15a]/30 bg-[#fff8e5] p-4 text-sm font-bold text-[#725012]">
             {message}
           </div>
         )}
 
-        <div className="grid gap-7 lg:grid-cols-[0.92fr_1.08fr]">
+        <div className="grid gap-7 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="space-y-4">
-            <div className="rounded-[2.25rem] border border-[#111827]/10 bg-white p-3 shadow-[0_24px_70px_rgba(17,24,39,0.08)]">
+            <div className="relative rounded-[2.25rem] border border-[#07111f]/10 bg-[#fffdf8] p-3 shadow-[0_24px_70px_rgba(7,17,31,0.08)]">
+              {listing.condition && (
+                <div className="absolute left-6 top-6 z-10 rounded-full border border-[#07111f]/10 bg-white/92 px-4 py-2 text-xs font-black text-[#07111f] shadow-sm backdrop-blur">
+                  ✓ {listing.condition}
+                </div>
+              )}
+
+              <div className="absolute right-6 top-6 z-10 rounded-full border border-[#07111f]/10 bg-white/92 px-4 py-2 text-xs font-black text-[#07111f] shadow-sm backdrop-blur">
+                ♡ {favoriteCount}
+              </div>
+
               {selectedImage ? (
                 <button
                   type="button"
                   onClick={() => openLightbox(selectedImageIndex)}
-                  className="relative block aspect-[4/5] w-full overflow-hidden rounded-[1.8rem] bg-[#f3eee3] text-left"
+                  className="relative block aspect-[4/5] w-full overflow-hidden rounded-[1.85rem] bg-[radial-gradient(circle_at_50%_12%,#ffffff,transparent_35%),linear-gradient(180deg,#fffdf8,#f2eadc)] text-left"
                   title="Fotoğrafı büyüt"
                 >
                   <img
@@ -466,83 +463,82 @@ export default function ListingDetailPage() {
                     className="h-full w-full object-contain"
                   />
 
-                  <div className="pointer-events-none absolute bottom-4 right-4 rounded-full bg-[#111827]/85 px-4 py-2 text-xs font-black text-white backdrop-blur">
+                  <div className="pointer-events-none absolute bottom-4 right-4 rounded-full bg-[#07111f]/90 px-4 py-2 text-xs font-black text-white shadow-lg backdrop-blur">
                     🔍 İncele
                   </div>
                 </button>
               ) : (
-                <div className="flex aspect-[4/5] items-center justify-center rounded-[1.8rem] bg-[#f3eee3] text-[#6b7280]">
+                <div className="flex aspect-[4/5] items-center justify-center rounded-[1.85rem] bg-[#f2eadc] text-[#667085]">
                   Fotoğraf yok
+                </div>
+              )}
+
+              {images.length > 1 && (
+                <div className="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-5 md:grid-cols-6">
+                  {images.map((image, index) => (
+                    <button
+                      key={image.id}
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`aspect-square overflow-hidden rounded-2xl border bg-white p-1 shadow-sm ${
+                        selectedImageIndex === index
+                          ? "border-[#c7a15a]"
+                          : "border-[#07111f]/10"
+                      }`}
+                      title="Fotoğrafı seç"
+                    >
+                      <img
+                        src={image.image_url}
+                        alt={listing.title}
+                        className="h-full w-full rounded-xl object-cover"
+                      />
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
 
-            {images.length > 1 && (
-              <div className="grid grid-cols-4 gap-3 sm:grid-cols-5 md:grid-cols-6">
-                {images.map((image, index) => (
-                  <button
-                    key={image.id}
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`aspect-square overflow-hidden rounded-2xl border bg-white p-1 shadow-sm ${
-                      selectedImageIndex === index
-                        ? "border-[#111827]"
-                        : "border-[#111827]/10"
-                    }`}
-                    title="Fotoğrafı seç"
-                  >
-                    <img
-                      src={image.image_url}
-                      alt={listing.title}
-                      className="h-full w-full rounded-xl object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="grid gap-3 rounded-[1.8rem] border border-[#07111f]/10 bg-[#fffdf8] p-4 shadow-[0_18px_55px_rgba(7,17,31,0.06)] sm:grid-cols-4">
+              <TrustItem title="%100 Orijinallik" text="Uzman onayıyla" />
+              <TrustItem title="Güvenli İletişim" text="Site içi mesajlaşma" />
+              <TrustItem title="Kalite Kontrol" text="elF inceleme akışı" />
+              <TrustItem title="Premium Pazar" text="Seçili ürün odağı" />
+            </div>
           </div>
 
           <div>
-            <div className="rounded-[2.25rem] border border-[#111827]/10 bg-white p-6 shadow-[0_24px_70px_rgba(17,24,39,0.08)] md:p-8">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-[#b9975b]/30 bg-[#f8f1df] px-4 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-[#7c5c1f]">
+            <div className="rounded-[2.25rem] border border-[#07111f]/10 bg-[#fffdf8] p-6 shadow-[0_24px_70px_rgba(7,17,31,0.08)] md:p-8">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span className="text-xs font-black uppercase tracking-[0.22em] text-[#c7a15a]">
                   {listing.category || "Futbol ürünü"}
                 </span>
 
-                {listing.club && (
-                  <span className="rounded-full border border-[#111827]/10 bg-[#fbfaf6] px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-[#6b7280]">
-                    {listing.club}
-                  </span>
-                )}
+                <span className="rounded-full border border-[#8a1538]/20 bg-[#8a1538] px-4 py-2 text-xs font-black text-white shadow-[0_14px_35px_rgba(138,21,56,0.16)]">
+                  Doğrulanmış İlan
+                </span>
               </div>
 
-              <h1 className="mt-5 text-4xl font-black leading-[0.98] tracking-[-0.06em] text-[#111827] md:text-5xl">
+              <h1 className="mt-5 text-4xl font-black leading-[0.98] tracking-[-0.06em] text-[#07111f] md:text-6xl">
                 {listing.title}
               </h1>
 
-              <div className="mt-6 rounded-[1.7rem] border border-[#111827]/10 bg-[#fbfaf6] p-5">
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-[#9ca3af]">
-                  Fiyat
-                </p>
+              <p className="mt-5 text-4xl font-black tracking-[-0.05em] text-[#8a1538] md:text-5xl">
+                {formattedPrice}
+              </p>
 
-                <p className="mt-2 text-4xl font-black tracking-[-0.045em] text-[#071a33]">
-                  {formattedPrice}
-                </p>
-              </div>
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="mt-6 grid overflow-hidden rounded-[1.6rem] border border-[#07111f]/10 bg-white sm:grid-cols-2">
                 <InfoBox label="Kulüp" value={listing.club} />
-                <InfoBox label="Sezon" value={listing.season} />
                 <InfoBox label="Marka" value={listing.brand} />
-                <InfoBox label="Beden" value={listing.size} />
                 <InfoBox label="Kondisyon" value={listing.condition} />
-                <InfoBox label="Şehir" value={listing.city} />
                 <InfoBox label="Ülke" value={listing.seller_country} />
+                <InfoBox label="Sezon" value={listing.season} />
+                <InfoBox label="Beden" value={listing.size} />
+                <InfoBox label="Şehir" value={listing.city} />
                 <InfoBox label="Orijinallik" value={listing.authenticity} />
               </div>
 
               {listing.ai_public_label && (
-                <div className="mt-5 rounded-[1.5rem] border border-[#b9975b]/35 bg-[#fff8e7] p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#7c5c1f]">
+                <div className="mt-5 rounded-[1.5rem] border border-[#c7a15a]/35 bg-[#fff8e5] p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#725012]">
                     elF kalite kontrol
                   </p>
 
@@ -553,8 +549,8 @@ export default function ListingDetailPage() {
               )}
 
               {listing.description && (
-                <div className="mt-6">
-                  <h2 className="text-xl font-black tracking-[-0.04em] text-[#111827]">
+                <div className="mt-6 border-t border-[#07111f]/10 pt-5">
+                  <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#07111f]">
                     Açıklama
                   </h2>
 
@@ -565,8 +561,8 @@ export default function ListingDetailPage() {
               )}
 
               {listing.originality_declaration && (
-                <div className="mt-6 rounded-[1.5rem] border border-[#111827]/10 bg-[#fbfaf6] p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#9ca3af]">
+                <div className="mt-5 rounded-[1.5rem] border border-[#07111f]/10 bg-[#fbf8f1] p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#667085]">
                     Satıcı beyanı
                   </p>
 
@@ -582,7 +578,7 @@ export default function ListingDetailPage() {
                     <button
                       onClick={contactSeller}
                       disabled={actionLoading}
-                      className="rounded-full bg-[#111827] px-6 py-4 text-sm font-black text-white shadow-[0_18px_45px_rgba(17,24,39,0.18)] hover:bg-[#071a33] disabled:opacity-60"
+                      className="rounded-full bg-[#07111f] px-6 py-4 text-sm font-black text-white shadow-[0_18px_45px_rgba(7,17,31,0.2)] hover:bg-[#0b1d35] disabled:opacity-60"
                     >
                       Satıcıya Mesaj Gönder
                     </button>
@@ -590,7 +586,7 @@ export default function ListingDetailPage() {
                     <button
                       onClick={toggleFavorite}
                       disabled={actionLoading}
-                      className="rounded-full border border-[#111827]/10 bg-white px-6 py-4 text-sm font-black text-[#111827] hover:border-[#b9975b]/40 hover:bg-[#fbfaf6] disabled:opacity-60"
+                      className="rounded-full border border-[#07111f]/14 bg-white px-6 py-4 text-sm font-black text-[#07111f] hover:border-[#c7a15a]/60 hover:bg-[#fffdf8] disabled:opacity-60"
                     >
                       {isFavorite ? "Favoriden Çıkar" : "Favoriye Ekle"}
                     </button>
@@ -601,7 +597,7 @@ export default function ListingDetailPage() {
                   <>
                     <Link
                       href={`/edit-listing/${listing.id}`}
-                      className="rounded-full bg-[#111827] px-6 py-4 text-center text-sm font-black text-white hover:bg-[#071a33]"
+                      className="rounded-full bg-[#07111f] px-6 py-4 text-center text-sm font-black text-white hover:bg-[#0b1d35]"
                     >
                       İlanı Düzenle
                     </Link>
@@ -610,7 +606,7 @@ export default function ListingDetailPage() {
                       <button
                         onClick={() => updateListingStatus("sold")}
                         disabled={actionLoading}
-                        className="rounded-full border border-emerald-800 bg-white px-6 py-4 text-sm font-black text-emerald-300 hover:bg-[#fbfaf6] disabled:opacity-60"
+                        className="rounded-full border border-emerald-800 bg-white px-6 py-4 text-sm font-black text-emerald-300 hover:bg-[#fffdf8] disabled:opacity-60"
                       >
                         Satıldı Yap
                       </button>
@@ -620,7 +616,7 @@ export default function ListingDetailPage() {
                       <button
                         onClick={() => updateListingStatus("removed")}
                         disabled={actionLoading}
-                        className="rounded-full border border-red-900 bg-white px-6 py-4 text-sm font-black text-red-300 hover:bg-[#fbfaf6] disabled:opacity-60"
+                        className="rounded-full border border-red-900 bg-white px-6 py-4 text-sm font-black text-red-300 hover:bg-[#fffdf8] disabled:opacity-60"
                       >
                         Yayından Kaldır
                       </button>
@@ -630,12 +626,12 @@ export default function ListingDetailPage() {
               </div>
             </div>
 
-            <div className="mt-6 rounded-[2rem] border border-[#111827]/10 bg-white p-6 shadow-[0_18px_55px_rgba(17,24,39,0.06)]">
-              <h2 className="text-xl font-black tracking-[-0.04em] text-[#111827]">
+            <div className="mt-6 rounded-[2rem] border border-[#07111f]/10 bg-[#fffdf8] p-6 shadow-[0_18px_55px_rgba(7,17,31,0.06)]">
+              <h2 className="text-xl font-black tracking-[-0.04em] text-[#07111f]">
                 Güvenli alışveriş notu
               </h2>
 
-              <p className="mt-3 text-sm leading-7 text-[#6b7280]">
+              <p className="mt-3 text-sm leading-7 text-[#667085]">
                 Ürün hakkında detaylı bilgi almak için site içi mesajlaşmayı
                 kullan. Ödeme, teslimat ve ürün doğrulama süreçlerinde dikkatli
                 ol. Şüpheli durumlarda işlem yapmadan önce satıcıdan ek fotoğraf
@@ -662,10 +658,7 @@ export default function ListingDetailPage() {
                 <button
                   onClick={() => {
                     setZoomed((current) => !current);
-                    setZoomPosition({
-                      x: 50,
-                      y: 50,
-                    });
+                    setZoomPosition({ x: 50, y: 50 });
                   }}
                   className="rounded-full border border-white/15 px-4 py-2 text-sm font-black text-white hover:bg-white/10"
                 >
@@ -729,10 +722,7 @@ export default function ListingDetailPage() {
                     onClick={() => {
                       setSelectedImageIndex(index);
                       setZoomed(false);
-                      setZoomPosition({
-                        x: 50,
-                        y: 50,
-                      });
+                      setZoomPosition({ x: 50, y: 50 });
                     }}
                     className={`h-20 w-20 shrink-0 overflow-hidden rounded-2xl border bg-black ${
                       selectedImageIndex === index
@@ -763,6 +753,23 @@ export default function ListingDetailPage() {
   );
 }
 
+function TrustItem({ title, text }: { title: string; text: string }) {
+  return (
+    <div className="flex items-center gap-3 border-[#07111f]/10 sm:border-r sm:last:border-r-0">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#c7a15a]/35 bg-[#fff8e5] text-sm font-black text-[#8a641a]">
+        ✓
+      </div>
+
+      <div>
+        <p className="text-xs font-black text-[#07111f]">{title}</p>
+        <p className="mt-0.5 text-[11px] font-semibold text-[#667085]">
+          {text}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function InfoBox({
   label,
   value,
@@ -771,12 +778,12 @@ function InfoBox({
   value: string | number | null | undefined;
 }) {
   return (
-    <div className="rounded-[1.25rem] border border-[#111827]/10 bg-[#fbfaf6] p-4">
-      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#9ca3af]">
+    <div className="border-b border-r border-[#07111f]/10 p-4 last:border-r-0">
+      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#8b95a5]">
         {label}
       </p>
 
-      <p className="mt-2 text-sm font-black text-[#111827]">{value || "-"}</p>
+      <p className="mt-2 text-sm font-black text-[#07111f]">{value || "-"}</p>
     </div>
   );
 }
@@ -815,7 +822,7 @@ function StatusBadge({ status }: { status: string | null }) {
   }
 
   return (
-    <span className="rounded-full border border-[#111827]/10 bg-white px-4 py-2 text-xs font-black text-[#6b7280]">
+    <span className="rounded-full border border-[#07111f]/10 bg-[#fffdf8] px-4 py-2 text-xs font-black text-[#667085]">
       {status || "Durum yok"}
     </span>
   );

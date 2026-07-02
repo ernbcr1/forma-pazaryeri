@@ -1,19 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  --elf-cream: #f6f1e8;
-  --elf-cream-2: #fbf8f1;
-  --elf-card: #fffdf8;
+  --elf-ink: #020713;
+  --elf-ink-2: #050b18;
+  --elf-ink-3: #08111f;
 
-  --elf-navy: #07111f;
-  --elf-navy-2: #0b1d35;
-  --elf-muted: #667085;
+  --elf-navy: #003366;
+  --elf-navy-soft: #0b3f75;
 
-  --elf-gold: #c7a15a;
-  --elf-gold-2: #efe1bd;
+  --elf-white: #ffffff;
+  --elf-ivory: #f8f5ee;
+  --elf-mist: #d8e2ee;
+  --elf-muted: #8ea3b8;
 
-  --elf-burgundy: #8a1538;
-  --elf-border: rgba(7, 17, 31, 0.11);
+  --elf-gold: #c9a66b;
+  --elf-gold-soft: #ead8b5;
+
+  --elf-border: rgba(255, 255, 255, 0.12);
+  --elf-border-strong: rgba(201, 166, 107, 0.36);
+
+  --elf-green: #86efac;
+  --elf-red: #f87171;
+  --elf-purple: #c4b5fd;
 }
 
 * {
@@ -22,31 +30,27 @@
 
 html {
   scroll-behavior: smooth;
-  background: var(--elf-cream);
+  background: var(--elf-ink);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 0%, rgba(199, 161, 90, 0.18), transparent 28%),
-    radial-gradient(circle at 88% 4%, rgba(7, 17, 31, 0.08), transparent 24%),
-    linear-gradient(180deg, #fffdf8 0%, #f6f1e8 48%, #efe6d8 100%);
-  color: var(--elf-navy);
+    radial-gradient(circle at 12% 0%, rgba(0, 51, 102, 0.35), transparent 28%),
+    radial-gradient(circle at 88% 8%, rgba(201, 166, 107, 0.14), transparent 22%),
+    radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.035), transparent 34%),
+    linear-gradient(180deg, #020713 0%, #050b18 44%, #020713 100%);
+  color: var(--elf-white);
   font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
-  letter-spacing: -0.012em;
+  letter-spacing: -0.015em;
 }
 
 ::selection {
   background: var(--elf-gold);
-  color: var(--elf-navy);
+  color: var(--elf-ink);
 }
 
 a {
@@ -77,25 +81,25 @@ img {
 h1,
 h2,
 h3 {
-  letter-spacing: -0.045em;
+  letter-spacing: -0.06em;
 }
 
 p {
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
-/* Formlar */
+/* Form alanları */
 .input-style {
   width: 100%;
   border-radius: 1.1rem;
   border: 1px solid var(--elf-border);
-  background: rgba(255, 253, 248, 0.94);
+  background: rgba(2, 7, 19, 0.86);
   padding: 0.95rem 1rem;
-  color: var(--elf-navy);
+  color: var(--elf-white);
   outline: none;
   box-shadow:
-    0 14px 40px rgba(7, 17, 31, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 18px 55px rgba(0, 0, 0, 0.18);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
@@ -103,20 +107,20 @@ p {
 }
 
 .input-style::placeholder {
-  color: rgba(102, 112, 133, 0.72);
+  color: rgba(216, 226, 238, 0.42);
 }
 
 .input-style:focus {
-  border-color: rgba(199, 161, 90, 0.8);
-  background: #ffffff;
+  border-color: rgba(201, 166, 107, 0.78);
+  background: rgba(2, 7, 19, 0.94);
   box-shadow:
-    0 0 0 4px rgba(199, 161, 90, 0.14),
-    0 18px 45px rgba(7, 17, 31, 0.08);
+    0 0 0 4px rgba(201, 166, 107, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .input-style option {
-  background: #ffffff;
-  color: var(--elf-navy);
+  background: var(--elf-ink);
+  color: var(--elf-white);
 }
 
 .line-clamp-2 {
@@ -126,178 +130,184 @@ p {
   overflow: hidden;
 }
 
-/* Eski dark classları premium light temaya çevir */
+/* Tailwind renklerini ultra premium palete çeviriyoruz */
 .bg-neutral-950 {
-  background-color: var(--elf-cream) !important;
+  background-color: var(--elf-ink) !important;
 }
 
 .bg-neutral-900 {
   background:
-    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(251, 248, 241, 0.98)) !important;
+    linear-gradient(180deg, rgba(8, 17, 31, 0.98), rgba(5, 11, 24, 0.98)) !important;
 }
 
 .bg-neutral-800 {
-  background-color: rgba(7, 17, 31, 0.055) !important;
+  background-color: rgba(255, 255, 255, 0.07) !important;
 }
 
 .bg-neutral-900\/90 {
-  background-color: rgba(255, 253, 248, 0.92) !important;
+  background-color: rgba(8, 17, 31, 0.9) !important;
 }
 
 .bg-neutral-950\/85,
 .bg-neutral-950\/95 {
-  background-color: rgba(255, 253, 248, 0.86) !important;
+  background-color: rgba(2, 7, 19, 0.94) !important;
+}
+
+.bg-white {
+  background-color: var(--elf-white) !important;
 }
 
 .text-white {
-  color: var(--elf-navy) !important;
+  color: var(--elf-white) !important;
 }
 
 .text-black {
-  color: var(--elf-navy) !important;
+  color: var(--elf-ink) !important;
 }
 
 .text-neutral-100,
 .text-neutral-200,
 .text-neutral-300 {
-  color: var(--elf-navy-2) !important;
+  color: var(--elf-ivory) !important;
 }
 
-.text-neutral-400,
+.text-neutral-400 {
+  color: var(--elf-mist) !important;
+}
+
 .text-neutral-500 {
   color: var(--elf-muted) !important;
 }
 
 .text-neutral-600 {
-  color: rgba(102, 112, 133, 0.74) !important;
+  color: rgba(216, 226, 238, 0.46) !important;
 }
 
 .border-neutral-700,
-.border-neutral-800,
-.border-neutral-600 {
+.border-neutral-800 {
   border-color: var(--elf-border) !important;
 }
 
-/* Header cam premium */
-.sticky {
-  background: rgba(255, 253, 248, 0.9) !important;
-  box-shadow:
-    0 18px 55px rgba(7, 17, 31, 0.08),
-    inset 0 -1px 0 rgba(7, 17, 31, 0.08);
+.border-neutral-600 {
+  border-color: rgba(255, 255, 255, 0.22) !important;
 }
 
-/* Butonlar */
+/* Premium hover */
+.hover\:bg-neutral-900:hover {
+  background-color: rgba(255, 255, 255, 0.075) !important;
+}
+
+.hover\:bg-neutral-800:hover {
+  background-color: rgba(255, 255, 255, 0.11) !important;
+}
+
+.hover\:bg-neutral-200:hover {
+  background-color: var(--elf-gold-soft) !important;
+}
+
+.hover\:text-white:hover {
+  color: var(--elf-white) !important;
+}
+
+.hover\:text-neutral-300:hover {
+  color: var(--elf-gold-soft) !important;
+}
+
+/* Beyaz butonları premium yap */
 .bg-white.text-black,
 a.bg-white,
 button.bg-white {
   background:
-    linear-gradient(180deg, var(--elf-navy), #020817) !important;
-  color: #ffffff !important;
+    linear-gradient(180deg, #ffffff, #efe6d4) !important;
+  color: var(--elf-ink) !important;
   box-shadow:
-    0 18px 45px rgba(7, 17, 31, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 18px 45px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
-.hover\:bg-neutral-900:hover,
-.hover\:bg-neutral-800:hover {
-  background-color: rgba(255, 255, 255, 0.76) !important;
-}
-
-.hover\:bg-neutral-200:hover {
-  background-color: var(--elf-gold-2) !important;
-}
-
-.hover\:text-white:hover {
-  color: var(--elf-navy) !important;
-}
-
-.hover\:text-neutral-300:hover {
-  color: var(--elf-gold) !important;
-}
-
-/* Kart gölgesi */
+/* Kart premium hissi */
 .rounded-\[2rem\],
 .rounded-\[2\.5rem\],
 .rounded-\[2\.75rem\],
 .rounded-3xl {
   box-shadow:
-    0 24px 70px rgba(7, 17, 31, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 28px 90px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 
 .border {
   border-color: var(--elf-border);
 }
 
-/* Rozetler */
+/* Rozet / durum renkleri */
 .bg-blue-950 {
-  background-color: rgba(11, 29, 53, 0.08) !important;
+  background-color: rgba(0, 51, 102, 0.42) !important;
 }
 
 .text-blue-300 {
-  color: var(--elf-navy-2) !important;
+  color: var(--elf-mist) !important;
 }
 
 .border-blue-800 {
-  border-color: rgba(11, 29, 53, 0.22) !important;
+  border-color: rgba(0, 51, 102, 0.65) !important;
 }
 
 .bg-emerald-950 {
-  background-color: rgba(4, 120, 87, 0.08) !important;
+  background-color: rgba(134, 239, 172, 0.12) !important;
 }
 
 .text-emerald-300 {
-  color: #047857 !important;
+  color: var(--elf-green) !important;
 }
 
 .border-emerald-800 {
-  border-color: rgba(4, 120, 87, 0.24) !important;
+  border-color: rgba(134, 239, 172, 0.36) !important;
 }
 
 .bg-yellow-950,
 .bg-yellow-950\/30,
 .bg-yellow-950\/40 {
-  background-color: rgba(199, 161, 90, 0.14) !important;
+  background-color: rgba(201, 166, 107, 0.16) !important;
 }
 
 .text-yellow-100,
 .text-yellow-200,
 .text-yellow-300 {
-  color: #8a641a !important;
+  color: var(--elf-gold-soft) !important;
 }
 
 .border-yellow-700,
 .border-yellow-800,
 .border-yellow-900 {
-  border-color: rgba(199, 161, 90, 0.34) !important;
+  border-color: rgba(201, 166, 107, 0.48) !important;
 }
 
 .bg-red-950 {
-  background-color: rgba(138, 21, 56, 0.08) !important;
+  background-color: rgba(248, 113, 113, 0.13) !important;
 }
 
 .text-red-300 {
-  color: var(--elf-burgundy) !important;
+  color: var(--elf-red) !important;
 }
 
 .border-red-800,
 .border-red-900 {
-  border-color: rgba(138, 21, 56, 0.24) !important;
+  border-color: rgba(248, 113, 113, 0.4) !important;
 }
 
 .bg-purple-950 {
-  background-color: rgba(109, 40, 217, 0.08) !important;
+  background-color: rgba(196, 181, 253, 0.13) !important;
 }
 
 .text-purple-300 {
-  color: #6d28d9 !important;
+  color: var(--elf-purple) !important;
 }
 
 .border-purple-800 {
-  border-color: rgba(109, 40, 217, 0.24) !important;
+  border-color: rgba(196, 181, 253, 0.4) !important;
 }
 
-/* Hareket */
+/* Link / buton animasyonu */
 button,
 a {
   -webkit-tap-highlight-color: transparent;
@@ -326,19 +336,19 @@ button:hover,
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--elf-cream);
+  background: var(--elf-ink);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(7, 17, 31, 0.18);
+  background: rgba(255, 255, 255, 0.18);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(199, 161, 90, 0.72);
+  background: rgba(201, 166, 107, 0.55);
 }
 
-/* Takım ticker */
+/* Takım kayan yazı */
 @keyframes tickerMove {
   0% {
     transform: translateX(0);
@@ -356,23 +366,4 @@ button:hover,
 
 .ticker-track:hover {
   animation-play-state: paused;
-}
-
-/* Lightbox koyu kalmalı */
-.elf-dark-area,
-.elf-dark-area * {
-  color: #ffffff !important;
-}
-
-.elf-dark-area .text-neutral-400 {
-  color: rgba(255, 255, 255, 0.68) !important;
-}
-
-.elf-dark-area .text-neutral-500 {
-  color: rgba(255, 255, 255, 0.5) !important;
-}
-
-.elf-dark-area button.bg-white {
-  background: #ffffff !important;
-  color: var(--elf-navy) !important;
 }

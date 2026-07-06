@@ -103,32 +103,6 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section className="mt-6 grid gap-4 md:grid-cols-4">
-            <BigCategory
-              title="Formalar"
-              text="Kulüp, sezon ve marka bilgisiyle listelenen seçili formalar."
-              href="/formalar"
-            />
-
-            <BigCategory
-              title="Vintage"
-              text="Geçmiş sezonlara ait koleksiyon değeri taşıyan parçalar."
-              href="/vintage-formalar"
-            />
-
-            <BigCategory
-              title="Kramponlar"
-              text="Numara, kondisyon ve marka bilgisiyle krampon ilanları."
-              href="/kramponlar"
-            />
-
-            <BigCategory
-              title="Koleksiyon"
-              text="Nadir, özel ve dikkat çeken futbol ürünleri."
-              href="/koleksiyon-formalar"
-            />
-          </section>
-
           <CategoryShowcase />
 
           <section className="mt-6 overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#050b18] shadow-[0_30px_95px_rgba(0,0,0,0.34)]">
@@ -234,35 +208,6 @@ function MiniCard({ title, text }: { title: string; text: string }) {
 
       <p className="mt-1 text-xs text-[#d8e2ee]/60">{text}</p>
     </div>
-  );
-}
-
-function BigCategory({
-  title,
-  text,
-  href,
-}: {
-  title: string;
-  text: string;
-  href: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group rounded-[2rem] border border-white/10 bg-[#050b18] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.27)] transition hover:-translate-y-1 hover:border-[#c9a66b]/45 hover:bg-white/[0.04]"
-    >
-      <div className="mb-8 h-px w-full bg-gradient-to-r from-[#c9a66b]/70 via-white/10 to-transparent" />
-
-      <h3 className="text-3xl font-black tracking-[-0.06em] text-white">
-        {title}
-      </h3>
-
-      <p className="mt-3 text-sm leading-7 text-[#d8e2ee]/70">{text}</p>
-
-      <p className="mt-5 text-sm font-black text-[#ead8b5]">
-        Keşfet →
-      </p>
-    </Link>
   );
 }
 

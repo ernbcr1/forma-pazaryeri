@@ -180,11 +180,15 @@ export default function AnnouncementBanner({
 
           <div className="relative min-h-[320px] border-t border-white/10 bg-[#020713] lg:border-l lg:border-t-0">
             {imageUrl && !imageFailed ? (
-              <>
+              <Link
+                href={buttonLink}
+                className="group absolute inset-0 block cursor-pointer"
+                title={announcement.title}
+              >
                 <img
                   src={imageUrl}
                   alt={announcement.title}
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-[1.025]"
                   onError={() =>
                     setFailedImages((current) => ({
                       ...current,
@@ -192,24 +196,33 @@ export default function AnnouncementBanner({
                     }))
                   }
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#020713]/58 via-transparent to-transparent" />
-              </>
+
+                <div className="absolute inset-0 bg-gradient-to-t from-[#020713]/64 via-transparent to-transparent" />
+
+                <div className="absolute bottom-5 left-5 rounded-full border border-white/15 bg-black/45 px-4 py-2 text-xs font-black text-white opacity-0 backdrop-blur transition group-hover:opacity-100">
+                  Görsele tıkla, duyuruyu aç
+                </div>
+              </Link>
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_30%_20%,rgba(201,166,107,0.24),transparent_30%),linear-gradient(135deg,#08111f,#020713)] p-8">
-                <div className="rounded-[2rem] border border-[#c9a66b]/25 bg-black/25 px-7 py-6 text-center backdrop-blur">
+              <Link
+                href={buttonLink}
+                className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_30%_20%,rgba(201,166,107,0.24),transparent_30%),linear-gradient(135deg,#08111f,#020713)] p-8"
+                title={announcement.title}
+              >
+                <div className="rounded-[2rem] border border-[#c9a66b]/25 bg-black/25 px-7 py-6 text-center backdrop-blur transition hover:border-[#c9a66b]/50">
                   <p className="text-xs font-black uppercase tracking-[0.28em] text-[#ead8b5]">
                     elFormazione
                   </p>
 
                   <p className="mt-3 text-sm leading-7 text-white/70">
-                    Duyuru görseli bulunamadı veya yüklenemedi.
+                    Duyuruyu görüntülemek için tıkla.
                   </p>
                 </div>
-              </div>
+              </Link>
             )}
 
             {announcements.length > 1 && (
-              <div className="absolute bottom-5 right-5 rounded-full border border-white/15 bg-black/45 px-4 py-2 text-xs font-black text-white backdrop-blur">
+              <div className="pointer-events-none absolute bottom-5 right-5 rounded-full border border-white/15 bg-black/45 px-4 py-2 text-xs font-black text-white backdrop-blur">
                 {activeIndex + 1} / {announcements.length}
               </div>
             )}

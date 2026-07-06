@@ -13,7 +13,11 @@ export default function BrandLogo({
   const imageSize = size === "sm" ? 36 : size === "lg" ? 56 : 44;
 
   const textSize =
-    size === "sm" ? "text-sm" : size === "lg" ? "text-2xl" : "text-base";
+    size === "sm"
+      ? "text-sm"
+      : size === "lg"
+        ? "text-2xl"
+        : "text-base md:text-lg";
 
   return (
     <div className="flex items-center gap-3">
@@ -31,12 +35,14 @@ export default function BrandLogo({
       </div>
 
       {showText && (
-        <div className="hidden md:block">
-          <p className={`${textSize} font-black leading-5 tracking-tight`}>
+        <div className="block min-w-0">
+          <p
+            className={`${textSize} max-w-[150px] truncate font-black leading-5 tracking-tight text-white md:max-w-none`}
+          >
             elFormazione
           </p>
 
-          <p className="mt-0.5 text-[11px] font-medium tracking-wide text-neutral-500">
+          <p className="mt-0.5 hidden text-[11px] font-medium tracking-wide text-neutral-500 sm:block">
             Original football marketplace
           </p>
         </div>

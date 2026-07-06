@@ -457,136 +457,127 @@ export default function ListingsPage() {
     sortType !== "newest";
 
   return (
-    <main className="min-h-screen bg-neutral-950 px-4 py-8 text-white md:px-8">
+    <main className="min-h-screen bg-neutral-950 px-4 py-7 text-white md:px-8">
       <section className="mx-auto max-w-7xl">
-        <div className="mb-8 rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6 md:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-sm text-neutral-500">elFormazione Market</p>
+        <div className="mb-6 overflow-hidden rounded-[2rem] border border-neutral-800 bg-neutral-900">
+          <div className="relative p-6 md:p-8 lg:p-10">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(201,166,107,0.16),transparent_28%),radial-gradient(circle_at_85%_15%,rgba(0,51,102,0.28),transparent_24%)]" />
 
-              <h1 className="mt-2 text-3xl font-black tracking-tight md:text-5xl">
-                Seçili futbol ürünleri
-              </h1>
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <div className="inline-flex items-center gap-3 rounded-full border border-yellow-800 bg-yellow-950 px-4 py-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-yellow-300" />
 
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-neutral-400 md:text-base">
-                Orijinal ve lisanslı ürün beyanıyla yayınlanan formalar,
-                antrenman ürünleri, aksesuarlar ve koleksiyon parçaları.
-              </p>
+                  <span className="text-[11px] font-black uppercase tracking-[0.24em] text-yellow-300">
+                    elFormazione Market
+                  </span>
+                </div>
+
+                <h1 className="mt-5 max-w-3xl text-4xl font-black leading-[0.98] tracking-tight md:text-6xl">
+                  Seçili futbol ürünleri
+                </h1>
+
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-400 md:text-base">
+                  Orijinal ve lisanslı ürün beyanıyla yayınlanan formalar,
+                  antrenman ürünleri, aksesuarlar ve koleksiyon parçaları.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/create-listing"
+                  className="rounded-full bg-white px-7 py-4 text-center text-sm font-black text-black hover:bg-neutral-200"
+                >
+                  İlan Ver
+                </Link>
+
+                <Link
+                  href="/rules"
+                  className="rounded-full border border-neutral-800 px-7 py-4 text-center text-sm font-black text-neutral-200 hover:bg-neutral-900"
+                >
+                  İlan Kuralları
+                </Link>
+              </div>
             </div>
-
-            <Link
-              href="/create-listing"
-              className="rounded-full bg-white px-6 py-3 text-center font-semibold text-black hover:bg-neutral-200"
-            >
-              İlan Ver
-            </Link>
           </div>
         </div>
 
-        <div className="mb-5 grid gap-3 lg:grid-cols-[1fr_220px]">
-          <input
-            value={searchText}
-            onChange={(event) => setSearchText(event.target.value)}
-            placeholder="Kulüp, sezon, marka, ürün ara..."
-            className="w-full rounded-full border border-neutral-800 bg-neutral-900 px-5 py-3 text-sm outline-none placeholder:text-neutral-600 focus:border-neutral-500"
-          />
-
-          <select
-            value={sortType}
-            onChange={(event) => setSortType(event.target.value)}
-            className="w-full rounded-full border border-neutral-800 bg-neutral-900 px-5 py-3 text-sm outline-none focus:border-neutral-500"
-          >
-            <option value="newest">En yeni</option>
-            <option value="price_low">Fiyat düşükten yükseğe</option>
-            <option value="price_high">Fiyat yüksekten düşüğe</option>
-            <option value="favorite_high">En çok favorilenen</option>
-          </select>
-        </div>
-
-        <div className="mb-5 overflow-x-auto">
-          <div className="flex min-w-max gap-2 pb-2">
-            {categories.map((category) => (
-              <button
-                key={category.key}
-                onClick={() => setSelectedCategory(category.key)}
-                className={`rounded-full border px-4 py-2 text-sm transition ${
-                  selectedCategory === category.key
-                    ? "border-white bg-white text-black"
-                    : "border-neutral-800 bg-neutral-900 text-neutral-300 hover:bg-neutral-800"
-                }`}
-              >
-                {category.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mb-6 grid gap-3 md:grid-cols-3">
-          <div>
-            <label className="mb-2 block text-xs font-semibold text-neutral-500">
-              Marka
-            </label>
+        <div className="mb-6 rounded-[2rem] border border-neutral-800 bg-neutral-900 p-4 md:p-5">
+          <div className="grid gap-3 lg:grid-cols-[1fr_230px]">
+            <input
+              value={searchText}
+              onChange={(event) => setSearchText(event.target.value)}
+              placeholder="Kulüp, sezon, marka, ürün ara..."
+              className="w-full rounded-full border border-neutral-800 bg-neutral-950 px-5 py-3 text-sm outline-none placeholder:text-neutral-600 focus:border-neutral-500"
+            />
 
             <select
+              value={sortType}
+              onChange={(event) => setSortType(event.target.value)}
+              className="w-full rounded-full border border-neutral-800 bg-neutral-950 px-5 py-3 text-sm outline-none focus:border-neutral-500"
+            >
+              <option value="newest">En yeni</option>
+              <option value="price_low">Fiyat düşükten yükseğe</option>
+              <option value="price_high">Fiyat yüksekten düşüğe</option>
+              <option value="favorite_high">En çok favorilenen</option>
+            </select>
+          </div>
+
+          <div className="mt-4 overflow-x-auto">
+            <div className="flex min-w-max gap-2 pb-1">
+              {categories.map((category) => (
+                <button
+                  key={category.key}
+                  onClick={() => setSelectedCategory(category.key)}
+                  className={`rounded-full border px-4 py-2 text-sm font-bold transition ${
+                    selectedCategory === category.key
+                      ? "border-white bg-white text-black"
+                      : "border-neutral-800 bg-neutral-950 text-neutral-300 hover:bg-neutral-800"
+                  }`}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <FilterSelect
+              label="Marka"
               value={selectedBrand}
-              onChange={(event) => setSelectedBrand(event.target.value)}
-              className="w-full rounded-full border border-neutral-800 bg-neutral-900 px-5 py-3 text-sm outline-none focus:border-neutral-500"
-            >
-              {brandOptions.map((brand) => (
-                <option key={brand} value={brand}>
-                  {brand}
-                </option>
-              ))}
-            </select>
-          </div>
+              onChange={setSelectedBrand}
+              options={brandOptions}
+            />
 
-          <div>
-            <label className="mb-2 block text-xs font-semibold text-neutral-500">
-              Beden / Numara
-            </label>
-
-            <select
+            <FilterSelect
+              label="Beden / Numara"
               value={selectedSize}
-              onChange={(event) => setSelectedSize(event.target.value)}
-              className="w-full rounded-full border border-neutral-800 bg-neutral-900 px-5 py-3 text-sm outline-none focus:border-neutral-500"
-            >
-              {sizeOptions.map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
-          </div>
+              onChange={setSelectedSize}
+              options={sizeOptions}
+            />
 
-          <div>
-            <label className="mb-2 block text-xs font-semibold text-neutral-500">
-              Şehir
-            </label>
-
-            <select
+            <FilterSelect
+              label="Şehir"
               value={selectedCity}
-              onChange={(event) => setSelectedCity(event.target.value)}
-              className="w-full rounded-full border border-neutral-800 bg-neutral-900 px-5 py-3 text-sm outline-none focus:border-neutral-500"
-            >
-              {cityOptions.map((city) => (
-                <option key={city} value={city}>
-                  {city}
-                </option>
-              ))}
-            </select>
+              onChange={setSelectedCity}
+              options={cityOptions}
+            />
           </div>
         </div>
 
         <div className="mb-6 flex flex-col gap-2 text-sm text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            {filteredListings.length} ilan gösteriliyor
+            <span className="font-black text-neutral-300">
+              {filteredListings.length}
+            </span>{" "}
+            ilan gösteriliyor
             {searchText.trim() ? ` • "${searchText.trim()}" araması` : ""}
           </p>
 
           {hasActiveFilter && (
             <button
               onClick={clearFilters}
-              className="text-left text-neutral-300 hover:text-white"
+              className="w-fit rounded-full border border-neutral-800 px-4 py-2 text-left text-sm font-bold text-neutral-300 hover:bg-neutral-900 hover:text-white"
             >
               Filtreleri temizle
             </button>
@@ -605,7 +596,7 @@ export default function ListingsPage() {
           </div>
         ) : filteredListings.length === 0 ? (
           <div className="rounded-3xl border border-neutral-800 bg-neutral-900 p-8">
-            <h2 className="text-2xl font-bold">Sonuç bulunamadı</h2>
+            <h2 className="text-2xl font-black">Sonuç bulunamadı</h2>
 
             <p className="mt-3 text-neutral-400">
               Arama kelimesini veya filtreleri değiştirerek tekrar deneyebilirsin.
@@ -613,7 +604,7 @@ export default function ListingsPage() {
 
             <button
               onClick={clearFilters}
-              className="mt-6 rounded-full bg-white px-6 py-3 font-semibold text-black hover:bg-neutral-200"
+              className="mt-6 rounded-full bg-white px-6 py-3 font-black text-black hover:bg-neutral-200"
             >
               Filtreleri Temizle
             </button>
@@ -626,9 +617,9 @@ export default function ListingsPage() {
               const favoriteCount = favoriteCounts[listing.id] ?? 0;
 
               return (
-                <div
+                <article
                   key={listing.id}
-                  className="group overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900 transition hover:-translate-y-1 hover:border-neutral-600"
+                  className="group overflow-hidden rounded-[1.9rem] border border-neutral-800 bg-neutral-900 transition duration-200 hover:-translate-y-1 hover:border-neutral-600"
                 >
                   <div className="relative aspect-[4/5] bg-neutral-950">
                     <Link href={`/listings/${listing.id}`}>
@@ -645,33 +636,37 @@ export default function ListingsPage() {
                       )}
                     </Link>
 
-                    <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-black/70 px-3 py-1 text-xs text-white backdrop-blur">
-                        {categoryText(listing.category)}
-                      </span>
+                    <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
+                      <div className="flex flex-wrap gap-2">
+                        <span className="rounded-full bg-black/70 px-3 py-1 text-[11px] font-bold text-white backdrop-blur">
+                          {categoryText(listing.category)}
+                        </span>
 
-                      <span className="rounded-full bg-emerald-950/90 px-3 py-1 text-xs text-emerald-300 backdrop-blur">
-                        {listing.ai_public_label || "elF Check"}
-                      </span>
+                        <span className="rounded-full bg-yellow-950/90 px-3 py-1 text-[11px] font-bold text-yellow-300 backdrop-blur">
+                          {listing.ai_public_label || "elF Check"}
+                        </span>
+                      </div>
+
+                      <button
+                        onClick={() => toggleFavorite(listing)}
+                        className={`shrink-0 rounded-full px-3 py-2 text-sm font-black backdrop-blur ${
+                          isFavorite
+                            ? "bg-white text-black"
+                            : "bg-black/70 text-white hover:bg-white hover:text-black"
+                        }`}
+                      >
+                        {isFavorite ? "♥" : "♡"} {favoriteCount}
+                      </button>
                     </div>
 
-                    <button
-                      onClick={() => toggleFavorite(listing)}
-                      className={`absolute right-3 top-3 rounded-full px-3 py-2 text-sm font-bold backdrop-blur ${
-                        isFavorite
-                          ? "bg-white text-black"
-                          : "bg-black/70 text-white hover:bg-white hover:text-black"
-                      }`}
-                    >
-                      {isFavorite ? "♥" : "♡"} {favoriteCount}
-                    </button>
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/65 to-transparent" />
                   </div>
 
                   <div className="p-4">
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <Link href={`/listings/${listing.id}`}>
-                          <h2 className="line-clamp-2 font-bold leading-5 hover:text-neutral-300">
+                          <h2 className="line-clamp-2 text-base font-black leading-5 hover:text-neutral-300">
                             {listing.title}
                           </h2>
                         </Link>
@@ -682,51 +677,83 @@ export default function ListingsPage() {
                         </p>
                       </div>
 
-                      <p className="whitespace-nowrap font-black">
+                      <p className="whitespace-nowrap text-base font-black text-white">
                         {Number(listing.price).toLocaleString("tr-TR")}₺
                       </p>
                     </div>
 
                     <div className="flex flex-wrap gap-2 text-xs text-neutral-400">
                       {listing.brand && (
-                        <span className="rounded-full bg-neutral-950 px-3 py-1">
+                        <span className="rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1">
                           {listing.brand}
                         </span>
                       )}
 
                       {listing.size && (
-                        <span className="rounded-full bg-neutral-950 px-3 py-1">
+                        <span className="rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1">
                           {listing.size}
                         </span>
                       )}
 
                       {listing.condition && (
-                        <span className="rounded-full bg-neutral-950 px-3 py-1">
+                        <span className="rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1">
                           {listing.condition}
                         </span>
                       )}
                     </div>
 
                     <div className="mt-4 flex items-center justify-between border-t border-neutral-800 pt-4 text-sm">
-                      <span className="text-neutral-500">
+                      <span className="truncate text-neutral-500">
                         {listing.city || "Konum yok"}
                       </span>
 
                       <Link
                         href={`/listings/${listing.id}`}
-                        className="font-medium text-white hover:text-neutral-300"
+                        className="shrink-0 font-black text-white hover:text-neutral-300"
                       >
                         İlanı Gör →
                       </Link>
                     </div>
                   </div>
-                </div>
+                </article>
               );
             })}
           </div>
         )}
       </section>
     </main>
+  );
+}
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: string[];
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-neutral-600">
+        {label}
+      </label>
+
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full rounded-full border border-neutral-800 bg-neutral-950 px-5 py-3 text-sm outline-none focus:border-neutral-500"
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
 

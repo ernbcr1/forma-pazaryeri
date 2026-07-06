@@ -14,7 +14,7 @@ export default function HomePage() {
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#c9a66b]/75 to-transparent" />
 
             <div className="relative p-7 md:p-11 lg:p-14">
-              <div className="max-w-5xl">
+              <div className="mx-auto max-w-6xl text-center">
                 <div className="inline-flex w-fit items-center gap-3 rounded-full border border-[#c9a66b]/25 bg-[#c9a66b]/10 px-4 py-2 backdrop-blur">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#c9a66b]" />
                   <span className="text-[11px] font-black uppercase tracking-[0.26em] text-[#ead8b5]">
@@ -22,16 +22,20 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                <h1 className="mt-7 max-w-5xl text-[3.1rem] font-black leading-[0.92] tracking-[-0.08em] md:text-7xl lg:text-[5.8rem]">
-                  Futbol dolabındaki hazineyi keşfet.
-                </h1>
+                <h1 className="mx-auto mt-7 max-w-6xl text-center text-[3.4rem] font-black leading-[0.88] tracking-[-0.095em] text-white drop-shadow-[0_14px_45px_rgba(0,0,0,0.55)] md:text-7xl lg:text-[6.4rem]">
+  Dolabındaki futbol{" "}
+  <span className="bg-gradient-to-r from-[#ffffff] via-[#ead8b5] to-[#c9a66b] bg-clip-text text-transparent">
+    hazinesini
+  </span>{" "}
+  keşfet.
+</h1>
 
-                <p className="mt-7 max-w-3xl text-base leading-8 text-[#d8e2ee]/78 md:text-lg">
-                  Orijinal forma, krampon, atkı, antrenman ürünü ve koleksiyon
-                  parçaları için seçili, düzenli ve kalite odaklı futbol pazarı.
-                </p>
+             <p className="mx-auto mt-7 max-w-3xl text-center text-base leading-8 text-[#d8e2ee]/78 md:text-lg">
+  Orijinal forma, krampon, atkı, antrenman ürünü ve koleksiyon
+  parçaları için seçili, düzenli ve kalite odaklı futbol pazarı.
+</p>
 
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                   <Link
                     href="/listings"
                     className="rounded-full bg-white px-8 py-4 text-center text-sm font-black text-[#020713] shadow-[0_20px_55px_rgba(0,0,0,0.35)] transition hover:bg-[#ead8b5]"

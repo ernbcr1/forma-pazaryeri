@@ -27,7 +27,10 @@ export default function AuthStatus() {
 
     return () => {
       window.removeEventListener("unread-messages-updated", handleMessageUpdate);
-      window.removeEventListener("notifications-updated", handleNotificationUpdate);
+      window.removeEventListener(
+        "notifications-updated",
+        handleNotificationUpdate
+      );
     };
   }, []);
 
@@ -88,11 +91,15 @@ export default function AuthStatus() {
     window.location.href = "/";
   }
 
+  function closeMenu() {
+    setMenuOpen(false);
+  }
+
   const totalBadgeCount = unreadMessageCount + unreadNotificationCount;
 
   if (loading) {
     return (
-      <div className="rounded-full border border-neutral-800 px-4 py-2 text-xs text-neutral-500">
+      <div className="rounded-full border border-neutral-800 px-4 py-2 text-xs font-bold text-neutral-500">
         Yükleniyor
       </div>
     );
@@ -119,25 +126,43 @@ export default function AuthStatus() {
 
         <button
           onClick={() => setMenuOpen((current) => !current)}
-          className="relative rounded-full border border-neutral-800 px-4 py-2 text-sm font-bold text-white hover:bg-neutral-900 md:hidden"
+          className="relative rounded-full border border-neutral-800 bg-neutral-950/70 px-5 py-3 text-sm font-black text-white shadow-[0_18px_45px_rgba(0,0,0,0.22)] hover:bg-neutral-900 md:hidden"
         >
           Menü
         </button>
 
         {menuOpen && (
-          <MobileMenu>
-            <MobileLink href="/listings" onClick={() => setMenuOpen(false)}>
-              Market
-            </MobileLink>
+          <>
+            <button
+              type="button"
+              aria-label="Menüyü kapat"
+              onClick={closeMenu}
+              className="fixed inset-0 z-[55] cursor-default bg-black/25 backdrop-blur-[2px] md:hidden"
+            />
 
-            <MobileLink href="/auth" onClick={() => setMenuOpen(false)}>
-              Giriş / Kayıt
-            </MobileLink>
+            <MobileMenu>
+              <div className="mb-2 rounded-[1.4rem] border border-neutral-800 bg-neutral-950 px-4 py-3">
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-yellow-300">
+                  elFormazione
+                </p>
+                <p className="mt-1 text-sm font-bold text-neutral-300">
+                  Hesabına giriş yap veya marketi keşfet.
+                </p>
+              </div>
 
-            <MobileLink href="/help" onClick={() => setMenuOpen(false)}>
-              Yardım
-            </MobileLink>
-          </MobileMenu>
+              <MobileLink href="/listings" onClick={closeMenu}>
+                Market
+              </MobileLink>
+
+              <MobileLink href="/auth" onClick={closeMenu}>
+                Giriş / Kayıt
+              </MobileLink>
+
+              <MobileLink href="/help" onClick={closeMenu}>
+                Yardım
+              </MobileLink>
+            </MobileMenu>
+          </>
         )}
       </div>
     );
@@ -174,63 +199,78 @@ export default function AuthStatus() {
 
       <button
         onClick={() => setMenuOpen((current) => !current)}
-        className="relative rounded-full border border-neutral-800 px-4 py-2 text-sm font-bold text-white hover:bg-neutral-900 xl:hidden"
+        className="relative rounded-full border border-neutral-800 bg-neutral-950/70 px-5 py-3 text-sm font-black text-white shadow-[0_18px_45px_rgba(0,0,0,0.22)] hover:bg-neutral-900 xl:hidden"
       >
         Menü
         {totalBadgeCount > 0 && <Badge count={totalBadgeCount} />}
       </button>
 
       {menuOpen && (
-        <MobileMenu>
-          <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-3 text-xs text-neutral-400">
-            <p className="truncate">{userEmail}</p>
-          </div>
-
-          <MobileLink href="/listings" onClick={() => setMenuOpen(false)}>
-            Market
-          </MobileLink>
-
-          <MobileLink href="/create-listing" onClick={() => setMenuOpen(false)}>
-            İlan Ver
-          </MobileLink>
-
-          <MobileLink href="/favorites" onClick={() => setMenuOpen(false)}>
-            Favorilerim
-          </MobileLink>
-
-          <MobileLink href="/notifications" onClick={() => setMenuOpen(false)}>
-            Bildirimler
-            {unreadNotificationCount > 0 && (
-              <span className="ml-2 rounded-full bg-white px-2 py-0.5 text-xs font-black text-black">
-                {unreadNotificationCount}
-              </span>
-            )}
-          </MobileLink>
-
-          <MobileLink href="/messages" onClick={() => setMenuOpen(false)}>
-            Mesajlar
-            {unreadMessageCount > 0 && (
-              <span className="ml-2 rounded-full bg-white px-2 py-0.5 text-xs font-black text-black">
-                {unreadMessageCount}
-              </span>
-            )}
-          </MobileLink>
-
-          <MobileLink href="/profile" onClick={() => setMenuOpen(false)}>
-            Profil
-          </MobileLink>
-
-          <MobileLink href="/help" onClick={() => setMenuOpen(false)}>
-            Yardım
-          </MobileLink>
-
+        <>
           <button
-            onClick={signOut}
-            className="mt-2 w-full rounded-2xl border border-neutral-800 px-4 py-3 text-left text-sm font-bold text-neutral-300 hover:bg-neutral-900 hover:text-white"
-          >
-            Çıkış Yap
-          </button>
-        </MobileMenu>
+            type="button"
+            aria-label="Menüyü kapat"
+            onClick={closeMenu}
+            className="fixed inset-0 z-[55] cursor-default bg-black/25 backdrop-blur-[2px] xl:hidden"
+          />
+
+          <MobileMenu>
+            <div className="rounded-[1.4rem] border border-neutral-800 bg-neutral-950 px-4 py-3">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-yellow-300">
+                Hesap
+              </p>
+
+              <p className="mt-1 truncate text-sm font-bold text-neutral-300">
+                {userEmail}
+              </p>
+            </div>
+
+            <div className="grid gap-1">
+              <MobileLink href="/listings" onClick={closeMenu}>
+                Market
+              </MobileLink>
+
+              <MobileLink href="/create-listing" onClick={closeMenu}>
+                İlan Ver
+              </MobileLink>
+
+              <MobileLink href="/favorites" onClick={closeMenu}>
+                Favorilerim
+              </MobileLink>
+
+              <MobileLink href="/notifications" onClick={closeMenu}>
+                <span>Bildirimler</span>
+                {unreadNotificationCount > 0 && (
+                  <InlineBadge count={unreadNotificationCount} />
+                )}
+              </MobileLink>
+
+              <MobileLink href="/messages" onClick={closeMenu}>
+                <span>Mesajlar</span>
+                {unreadMessageCount > 0 && (
+                  <InlineBadge count={unreadMessageCount} />
+                )}
+              </MobileLink>
+
+              <MobileLink href="/profile" onClick={closeMenu}>
+                Profil
+              </MobileLink>
+
+              <MobileLink href="/help" onClick={closeMenu}>
+                Yardım
+              </MobileLink>
+            </div>
+
+            <div className="mt-2 border-t border-neutral-800 pt-3">
+              <button
+                onClick={signOut}
+                className="w-full rounded-[1.4rem] border border-neutral-800 bg-neutral-950 px-4 py-3 text-left text-sm font-black text-neutral-300 hover:bg-neutral-900 hover:text-white"
+              >
+                Çıkış Yap
+              </button>
+            </div>
+          </MobileMenu>
+        </>
       )}
     </div>
   );
@@ -244,9 +284,17 @@ function Badge({ count }: { count: number }) {
   );
 }
 
+function InlineBadge({ count }: { count: number }) {
+  return (
+    <span className="ml-auto flex h-6 min-w-6 items-center justify-center rounded-full bg-white px-2 text-xs font-black text-black">
+      {count}
+    </span>
+  );
+}
+
 function MobileMenu({ children }: { children: React.ReactNode }) {
   return (
-    <div className="absolute right-0 top-12 z-[60] w-[min(88vw,320px)] rounded-[2rem] border border-neutral-800 bg-neutral-950 p-3 shadow-2xl">
+    <div className="absolute right-0 top-14 z-[60] w-[min(86vw,310px)] overflow-hidden rounded-[1.8rem] border border-neutral-800 bg-[#020713]/95 p-3 shadow-[0_35px_100px_rgba(0,0,0,0.55)] backdrop-blur-xl">
       <div className="space-y-2">{children}</div>
     </div>
   );
@@ -265,9 +313,9 @@ function MobileLink({
     <Link
       href={href}
       onClick={onClick}
-      className="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-bold text-neutral-300 hover:bg-neutral-900 hover:text-white"
+      className="flex items-center justify-between rounded-[1.25rem] px-4 py-3 text-sm font-black text-neutral-300 hover:bg-white/[0.055] hover:text-white"
     >
-      <span>{children}</span>
+      {children}
     </Link>
   );
 }

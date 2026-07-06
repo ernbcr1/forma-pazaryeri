@@ -421,9 +421,9 @@ export default function ListingDetailPage() {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-950 px-4 py-8 text-white md:px-8">
+    <main className="min-h-screen bg-neutral-950 px-4 py-7 text-white md:px-8">
       <section className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <Link
             href="/listings"
             className="w-fit rounded-full border border-neutral-800 px-5 py-3 text-sm font-bold text-neutral-300 hover:bg-neutral-900 hover:text-white"
@@ -433,6 +433,7 @@ export default function ListingDetailPage() {
 
           <div className="flex flex-wrap gap-2">
             <StatusBadge status={listing.status} />
+
             <span className="rounded-full border border-neutral-800 px-4 py-2 text-xs font-bold text-neutral-400">
               {favoriteCount} favori
             </span>
@@ -440,43 +441,45 @@ export default function ListingDetailPage() {
         </div>
 
         {message && (
-          <div className="mb-6 rounded-2xl border border-neutral-800 bg-neutral-900 p-4 text-sm text-neutral-300">
+          <div className="mb-5 rounded-2xl border border-neutral-800 bg-neutral-900 p-4 text-sm text-neutral-300">
             {message}
           </div>
         )}
 
-        <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-          <div>
-            {selectedImage ? (
-              <button
-                type="button"
-                onClick={() => openLightbox(selectedImageIndex)}
-                className="relative block aspect-[4/5] w-full overflow-hidden rounded-[2rem] border border-neutral-800 bg-neutral-950 text-left"
-                title="Fotoğrafı büyüt"
-              >
-                <img
-                  src={selectedImage}
-                  alt={listing.title}
-                  className="h-full w-full object-contain"
-                />
+        <div className="grid gap-6 lg:grid-cols-[0.88fr_1.12fr] xl:grid-cols-[0.82fr_1.18fr]">
+          <div className="space-y-4">
+            <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-3">
+              {selectedImage ? (
+                <button
+                  type="button"
+                  onClick={() => openLightbox(selectedImageIndex)}
+                  className="relative block aspect-[4/5] max-h-[680px] w-full overflow-hidden rounded-[1.55rem] border border-white/10 bg-neutral-950 text-left"
+                  title="Fotoğrafı büyüt"
+                >
+                  <img
+                    src={selectedImage}
+                    alt={listing.title}
+                    className="h-full w-full object-contain"
+                  />
 
-                <div className="pointer-events-none absolute bottom-4 right-4 rounded-full bg-black/65 px-4 py-2 text-xs font-bold text-white backdrop-blur">
-                  🔍 İncele
+                  <div className="pointer-events-none absolute bottom-4 right-4 rounded-full bg-black/65 px-4 py-2 text-xs font-bold text-white backdrop-blur">
+                    🔍 İncele
+                  </div>
+                </button>
+              ) : (
+                <div className="flex aspect-[4/5] max-h-[680px] items-center justify-center rounded-[1.55rem] border border-neutral-800 bg-neutral-950 text-neutral-500">
+                  Fotoğraf yok
                 </div>
-              </button>
-            ) : (
-              <div className="flex aspect-[4/5] items-center justify-center rounded-[2rem] border border-neutral-800 bg-neutral-900 text-neutral-500">
-                Fotoğraf yok
-              </div>
-            )}
+              )}
+            </div>
 
             {images.length > 1 && (
-              <div className="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-5 md:grid-cols-6">
+              <div className="grid grid-cols-5 gap-2 sm:grid-cols-6 md:grid-cols-7 lg:grid-cols-5 xl:grid-cols-6">
                 {images.map((image, index) => (
                   <button
                     key={image.id}
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`aspect-square overflow-hidden rounded-2xl border bg-neutral-950 ${
+                    className={`aspect-square overflow-hidden rounded-2xl border bg-neutral-950 p-1 ${
                       selectedImageIndex === index
                         ? "border-white"
                         : "border-neutral-800"
@@ -486,7 +489,7 @@ export default function ListingDetailPage() {
                     <img
                       src={image.image_url}
                       alt={listing.title}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full rounded-xl object-cover"
                     />
                   </button>
                 ))}
@@ -494,19 +497,35 @@ export default function ListingDetailPage() {
             )}
           </div>
 
-          <div>
-            <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6 md:p-8">
-              <p className="text-sm text-neutral-500">
-                {listing.category || "Futbol ürünü"}
-              </p>
+          <div className="space-y-5">
+            <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-5 md:p-7">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-neutral-800 bg-neutral-950 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-neutral-500">
+                  {listing.category || "Futbol ürünü"}
+                </span>
 
-              <h1 className="mt-3 text-4xl font-black leading-tight tracking-tight md:text-5xl">
+                {listing.club && (
+                  <span className="rounded-full border border-yellow-800 bg-yellow-950 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-yellow-300">
+                    {listing.club}
+                  </span>
+                )}
+              </div>
+
+              <h1 className="mt-5 text-4xl font-black leading-[1.02] tracking-tight md:text-5xl">
                 {listing.title}
               </h1>
 
-              <p className="mt-5 text-4xl font-black">{formattedPrice}</p>
+              <div className="mt-5 rounded-[1.5rem] border border-neutral-800 bg-neutral-950 p-5">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-neutral-600">
+                  Fiyat
+                </p>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <p className="mt-2 text-4xl font-black tracking-tight">
+                  {formattedPrice}
+                </p>
+              </div>
+
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <InfoBox label="Kulüp" value={listing.club} />
                 <InfoBox label="Sezon" value={listing.season} />
                 <InfoBox label="Marka" value={listing.brand} />
@@ -530,8 +549,8 @@ export default function ListingDetailPage() {
               )}
 
               {listing.description && (
-                <div className="mt-6">
-                  <h2 className="text-xl font-black">Açıklama</h2>
+                <div className="mt-6 border-t border-neutral-800 pt-5">
+                  <h2 className="text-lg font-black">Açıklama</h2>
 
                   <p className="mt-3 whitespace-pre-line text-sm leading-8 text-neutral-400">
                     {listing.description}
@@ -540,7 +559,7 @@ export default function ListingDetailPage() {
               )}
 
               {listing.originality_declaration && (
-                <div className="mt-6 rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+                <div className="mt-5 rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-neutral-500">
                     Satıcı beyanı
                   </p>
@@ -551,7 +570,7 @@ export default function ListingDetailPage() {
                 </div>
               )}
 
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 {!isOwner && (
                   <>
                     <button
@@ -605,15 +624,23 @@ export default function ListingDetailPage() {
               </div>
             </div>
 
-            <div className="mt-6 rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6">
-              <h2 className="text-xl font-black">Güvenli alışveriş notu</h2>
+            <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-5">
+              <div className="flex items-start gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-yellow-800 bg-yellow-950 text-sm font-black text-yellow-300">
+                  elF
+                </div>
 
-              <p className="mt-3 text-sm leading-7 text-neutral-400">
-                Ürün hakkında detaylı bilgi almak için site içi mesajlaşmayı
-                kullan. Ödeme, teslimat ve ürün doğrulama süreçlerinde dikkatli
-                ol. Şüpheli durumlarda işlem yapmadan önce satıcıdan ek fotoğraf
-                ve bilgi iste.
-              </p>
+                <div>
+                  <h2 className="text-lg font-black">Güvenli alışveriş notu</h2>
+
+                  <p className="mt-2 text-sm leading-7 text-neutral-400">
+                    Ürün hakkında detaylı bilgi almak için site içi mesajlaşmayı
+                    kullan. Ödeme, teslimat ve ürün doğrulama süreçlerinde
+                    dikkatli ol. Şüpheli durumlarda işlem yapmadan önce
+                    satıcıdan ek fotoğraf ve bilgi iste.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -745,7 +772,7 @@ function InfoBox({
 }) {
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
-      <p className="text-xs font-black uppercase tracking-[0.18em] text-neutral-600">
+      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-neutral-600">
         {label}
       </p>
 

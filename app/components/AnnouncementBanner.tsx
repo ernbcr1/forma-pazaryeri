@@ -103,14 +103,33 @@ export default function AnnouncementBanner({
   const imageFailed = failedImages[announcement.id];
 
   return (
-    <section className="mb-7 overflow-hidden rounded-[2.75rem] border border-white/10 bg-[#050b18] shadow-[0_35px_110px_rgba(0,0,0,0.42)]">
-      <div className="relative">
+    <section className="mb-7 overflow-hidden rounded-[2.3rem] border border-white/10 bg-[#050b18] shadow-[0_35px_110px_rgba(0,0,0,0.42)] md:rounded-[2.75rem]">
+      <div className="relative min-h-[560px] overflow-hidden lg:min-h-0">
         <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_15%_5%,rgba(201,166,107,0.18),transparent_28%),radial-gradient(circle_at_85%_22%,rgba(0,51,102,0.42),transparent_28%)]" />
 
+        {imageUrl && !imageFailed && (
+          <div className="absolute inset-0 z-0 lg:hidden">
+            <img
+              src={imageUrl}
+              alt={announcement.title}
+              className="h-full w-full object-cover opacity-65"
+              onError={() =>
+                setFailedImages((current) => ({
+                  ...current,
+                  [announcement.id]: true,
+                }))
+              }
+            />
+
+            <div className="absolute inset-0 bg-gradient-to-b from-[#020713]/58 via-[#020713]/72 to-[#020713]/92" />
+          </div>
+        )}
+
         <div className="relative z-10 grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="flex min-h-[360px] flex-col justify-center p-7 md:p-10 lg:p-12">
-            <div className="mb-5 inline-flex w-fit items-center gap-3 rounded-full border border-[#c9a66b]/25 bg-[#c9a66b]/10 px-4 py-2">
+          <div className="flex min-h-[560px] flex-col justify-center p-7 md:p-10 lg:min-h-[360px] lg:p-12">
+            <div className="mb-5 inline-flex w-fit items-center gap-3 rounded-full border border-[#c9a66b]/25 bg-[#c9a66b]/10 px-4 py-2 backdrop-blur">
               <span className="h-1.5 w-1.5 rounded-full bg-[#c9a66b]" />
+
               <span className="text-[11px] font-black uppercase tracking-[0.24em] text-[#ead8b5]">
                 Duyuru
               </span>
@@ -136,7 +155,7 @@ export default function AnnouncementBanner({
 
               <Link
                 href="/listings"
-                className="rounded-full border border-white/15 px-7 py-3 text-center text-sm font-black text-white transition hover:border-[#c9a66b]/50 hover:bg-white/[0.06]"
+                className="rounded-full border border-white/15 bg-black/10 px-7 py-3 text-center text-sm font-black text-white backdrop-blur transition hover:border-[#c9a66b]/50 hover:bg-white/[0.06]"
               >
                 Marketi Keşfet
               </Link>
@@ -178,7 +197,7 @@ export default function AnnouncementBanner({
             )}
           </div>
 
-          <div className="relative min-h-[320px] border-t border-white/10 bg-[#020713] lg:border-l lg:border-t-0">
+          <div className="relative hidden min-h-[360px] border-l border-white/10 bg-[#020713] lg:block">
             {imageUrl && !imageFailed ? (
               <Link
                 href={buttonLink}
@@ -228,6 +247,12 @@ export default function AnnouncementBanner({
             )}
           </div>
         </div>
+
+        {announcements.length > 1 && (
+          <div className="pointer-events-none absolute bottom-5 right-5 z-20 rounded-full border border-white/15 bg-black/45 px-4 py-2 text-xs font-black text-white backdrop-blur lg:hidden">
+            {activeIndex + 1} / {announcements.length}
+          </div>
+        )}
       </div>
     </section>
   );

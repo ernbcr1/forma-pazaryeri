@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 
@@ -40,6 +40,14 @@ type Favorite = {
   user_id: string;
 };
 
+type FilterKey =
+  | "all"
+  | "active"
+  | "pending"
+  | "needs_revision"
+  | "sold"
+  | "removed";
+
 export default function ProfilePage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -47,9 +55,14 @@ export default function ProfilePage() {
   const [favoriteCounts, setFavoriteCounts] = useState<Record<string, number>>(
     {}
   );
+
+  const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"info" | "success" | "error">(
+    "info"
+  );
 
   useEffect(() => {
     loadProfile();
@@ -86,7 +99,7 @@ export default function ProfilePage() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      setMessage("İlanların yüklenemedi: " + error.message);
+      showMessage("İlanların yüklenemedi: " + error.message, "error", false);
       setLoading(false);
       return;
     }
@@ -108,7 +121,26 @@ export default function ProfilePage() {
     setLoading(false);
   }
 
-  async function notifyFavoriters(listing: Listing, type: "listing_sold" | "listing_removed") {
+  function showMessage(
+    nextMessage: string,
+    nextType: "info" | "success" | "error" = "info",
+    scroll = true
+  ) {
+    setMessage(nextMessage);
+    setMessageType(nextType);
+
+    if (scroll) {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  }
+
+  async function notifyFavoriters(
+    listing: Listing,
+    type: "listing_sold" | "listing_removed"
+  ) {
     if (!currentUserId) return;
 
     const { data: favoriteData } = await supabase
@@ -132,8 +164,8 @@ export default function ProfilePage() {
             : `Favorilediğiniz "${listing.title}" yayından kaldırıldı.`,
         body:
           type === "listing_sold"
-            ? "Favorilerinize eklediğiniz bu ilan satıldı olarak işaretlendi. Detayları görmek veya satıcıyla iletişime geçmek için bildirimi açabilirsiniz."
-            : "Favorilerinize eklediğiniz bu ilan satıcı tarafından yayından kaldırıldı. Detayları görmek veya satıcıyla iletişime geçmek için bildirimi açabilirsiniz.",
+            ? "Favorilerinize eklediğiniz bu ilan satıldı olarak işaretlendi."
+            : "Favorilerinize eklediğiniz bu ilan satıcı tarafından yayından kaldırıldı.",
       }));
 
     if (notificationRows.length === 0) return;
@@ -153,7 +185,7 @@ export default function ProfilePage() {
     if (!confirmAction) return;
 
     setActionLoadingId(listing.id);
-    setMessage("İlan satıldı olarak güncelleniyor...");
+    showMessage("İlan satıldı olarak güncelleniyor...", "info");
 
     const { error } = await supabase
       .from("listings")
@@ -165,7 +197,7 @@ export default function ProfilePage() {
       .eq("user_id", currentUserId);
 
     if (error) {
-      setMessage("İlan güncellenemedi: " + error.message);
+      showMessage("İlan güncellenemedi: " + error.message, "error");
       setActionLoadingId(null);
       return;
     }
@@ -184,7 +216,7 @@ export default function ProfilePage() {
       )
     );
 
-    setMessage("İlan satıldı olarak işaretlendi.");
+    showMessage("İlan satıldı olarak işaretlendi.", "success");
     setActionLoadingId(null);
   }
 
@@ -196,7 +228,7 @@ export default function ProfilePage() {
     if (!confirmAction) return;
 
     setActionLoadingId(listing.id);
-    setMessage("İlan yayından kaldırılıyor...");
+    showMessage("İlan yayından kaldırılıyor...", "info");
 
     const { error } = await supabase
       .from("listings")
@@ -208,7 +240,7 @@ export default function ProfilePage() {
       .eq("user_id", currentUserId);
 
     if (error) {
-      setMessage("İlan yayından kaldırılamadı: " + error.message);
+      showMessage("İlan yayından kaldırılamadı: " + error.message, "error");
       setActionLoadingId(null);
       return;
     }
@@ -227,7 +259,7 @@ export default function ProfilePage() {
       )
     );
 
-    setMessage("İlan yayından kaldırıldı.");
+    showMessage("İlan yayından kaldırıldı.", "success");
     setActionLoadingId(null);
   }
 
@@ -239,7 +271,7 @@ export default function ProfilePage() {
     if (!confirmAction) return;
 
     setActionLoadingId(listing.id);
-    setMessage("İlan tekrar onaya gönderiliyor...");
+    showMessage("İlan tekrar onaya gönderiliyor...", "info");
 
     const { error } = await supabase
       .from("listings")
@@ -254,7 +286,7 @@ export default function ProfilePage() {
       .eq("user_id", currentUserId);
 
     if (error) {
-      setMessage("İlan tekrar onaya gönderilemedi: " + error.message);
+      showMessage("İlan tekrar onaya gönderilemedi: " + error.message, "error");
       setActionLoadingId(null);
       return;
     }
@@ -273,19 +305,26 @@ export default function ProfilePage() {
       )
     );
 
-    setMessage("İlan tekrar admin onayına gönderildi.");
+    setActiveFilter("pending");
+    showMessage("İlan tekrar admin onayına gönderildi.", "success");
     setActionLoadingId(null);
   }
 
   async function permanentlyDeleteListing(listing: Listing) {
-    const confirmAction = window.confirm(
+    const firstConfirm = window.confirm(
       `"${listing.title}" kalıcı olarak silinecek. Bu işlem geri alınamaz. Emin misin?`
     );
 
-    if (!confirmAction) return;
+    if (!firstConfirm) return;
+
+    const secondConfirm = window.confirm(
+      "Son kez onayla: Bu ilan, profilinden tamamen kaldırılacak."
+    );
+
+    if (!secondConfirm) return;
 
     setActionLoadingId(listing.id);
-    setMessage("İlan kalıcı olarak siliniyor...");
+    showMessage("İlan kalıcı olarak siliniyor...", "info");
 
     const { error } = await supabase
       .from("listings")
@@ -294,7 +333,7 @@ export default function ProfilePage() {
       .eq("user_id", currentUserId);
 
     if (error) {
-      setMessage("İlan silinemedi: " + error.message);
+      showMessage("İlan silinemedi: " + error.message, "error");
       setActionLoadingId(null);
       return;
     }
@@ -303,113 +342,216 @@ export default function ProfilePage() {
       currentListings.filter((item) => item.id !== listing.id)
     );
 
-    setMessage("İlan kalıcı olarak silindi.");
+    showMessage("İlan kalıcı olarak silindi.", "success");
     setActionLoadingId(null);
   }
 
-  const totalCount = listings.length;
-  const activeCount = listings.filter((listing) => listing.status === "active").length;
-  const pendingCount = listings.filter((listing) => listing.status === "pending").length;
-  const revisionCount = listings.filter(
-    (listing) => listing.status === "needs_revision"
-  ).length;
-  const soldCount = listings.filter((listing) => listing.status === "sold").length;
-  const removedCount = listings.filter((listing) => listing.status === "removed").length;
+  const counts = useMemo(() => {
+    return {
+      total: listings.length,
+      active: listings.filter((listing) => listing.status === "active").length,
+      pending: listings.filter((listing) => listing.status === "pending").length,
+      needs_revision: listings.filter(
+        (listing) => listing.status === "needs_revision"
+      ).length,
+      sold: listings.filter((listing) => listing.status === "sold").length,
+      removed: listings.filter((listing) => listing.status === "removed").length,
+    };
+  }, [listings]);
+
+  const totalFavorites = useMemo(() => {
+    return listings.reduce((total, listing) => {
+      return total + (favoriteCounts[listing.id] ?? 0);
+    }, 0);
+  }, [listings, favoriteCounts]);
+
+  const filteredListings = useMemo(() => {
+    if (activeFilter === "all") return listings;
+
+    return listings.filter((listing) => listing.status === activeFilter);
+  }, [listings, activeFilter]);
 
   if (loading) {
     return (
       <main className="min-h-screen bg-neutral-950 px-4 py-8 text-white md:px-8">
         <section className="mx-auto max-w-7xl">
-          <p className="text-neutral-400">Profil yükleniyor...</p>
+          <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-8">
+            <p className="text-neutral-400">Profil yükleniyor...</p>
+          </div>
         </section>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-neutral-950 px-4 py-8 text-white md:px-8">
+    <main className="min-h-screen bg-neutral-950 px-4 py-6 text-white md:px-8 md:py-8">
       <section className="mx-auto max-w-7xl">
-        <div className="mb-8 rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6 md:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-sm text-neutral-500">elFormazione</p>
+        <div className="mb-6 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6 md:rounded-[2.4rem] md:p-8">
+            <div className="inline-flex items-center gap-3 rounded-full border border-yellow-800 bg-yellow-950 px-4 py-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-yellow-300" />
 
-              <h1 className="mt-2 text-3xl font-black tracking-tight md:text-5xl">
+              <span className="text-[11px] font-black uppercase tracking-[0.22em] text-yellow-300">
                 Kullanıcı Paneli
-              </h1>
+              </span>
+            </div>
 
-              <p className="mt-4 text-sm text-neutral-400 md:text-base">
+            <h1 className="mt-5 text-4xl font-black leading-[0.95] tracking-tight md:text-5xl">
+              İlanlarını yönet.
+            </h1>
+
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-400 md:text-base">
+              Yayındaki, onay bekleyen, satılan ve kaldırılan ilanlarını tek
+              yerden takip et. Gerekirse fiyat/açıklama düzenle veya ilanı
+              tekrar onaya gönder.
+            </p>
+
+            <div className="mt-5 rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-3">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-neutral-600">
+                Hesap
+              </p>
+
+              <p className="mt-1 truncate text-sm font-bold text-neutral-300">
                 {userEmail}
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/create-listing"
-                className="rounded-full bg-white px-6 py-3 text-center font-semibold text-black hover:bg-neutral-200"
+                className="rounded-full bg-white px-6 py-3 text-center text-sm font-black text-black hover:bg-neutral-200"
               >
                 Yeni İlan Ver
               </Link>
 
               <Link
                 href="/favorites"
-                className="rounded-full border border-neutral-700 px-6 py-3 text-center font-semibold hover:bg-neutral-800"
+                className="rounded-full border border-neutral-700 px-6 py-3 text-center text-sm font-black text-neutral-300 hover:bg-neutral-800"
               >
                 Favorilerim
+              </Link>
+
+              <Link
+                href="/messages"
+                className="rounded-full border border-neutral-700 px-6 py-3 text-center text-sm font-black text-neutral-300 hover:bg-neutral-800"
+              >
+                Mesajlar
               </Link>
             </div>
           </div>
 
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-            <StatCard label="Toplam İlan" value={String(totalCount)} />
-            <StatCard label="Yayında" value={String(activeCount)} />
-            <StatCard label="Onay Bekleyen" value={String(pendingCount)} />
-            <StatCard label="Düzenleme" value={String(revisionCount)} />
-            <StatCard label="Satılan" value={String(soldCount)} />
-            <StatCard label="Kaldırılan" value={String(removedCount)} />
+          <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6 md:rounded-[2.4rem]">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-neutral-500">
+              Özet
+            </p>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <StatCard label="Toplam İlan" value={String(counts.total)} />
+              <StatCard label="Toplam Favori" value={String(totalFavorites)} />
+              <StatCard label="Yayında" value={String(counts.active)} />
+              <StatCard label="Onay Bekleyen" value={String(counts.pending)} />
+              <StatCard
+                label="Düzenleme"
+                value={String(counts.needs_revision)}
+              />
+              <StatCard label="Satılan" value={String(counts.sold)} />
+            </div>
           </div>
         </div>
 
         {message && (
-          <div className="mb-6 rounded-2xl border border-neutral-800 bg-neutral-900 p-4 text-sm text-neutral-300">
+          <div
+            className={`mb-6 rounded-2xl border p-4 text-sm font-semibold ${
+              messageType === "success"
+                ? "border-emerald-800 bg-emerald-950 text-emerald-300"
+                : messageType === "error"
+                  ? "border-red-900 bg-red-950 text-red-300"
+                  : "border-neutral-800 bg-neutral-900 text-neutral-300"
+            }`}
+          >
             {message}
           </div>
         )}
 
+        <div className="mb-6 overflow-x-auto pb-1">
+          <div className="flex min-w-max gap-2">
+            <FilterButton
+              active={activeFilter === "all"}
+              onClick={() => setActiveFilter("all")}
+              label="Tümü"
+              count={counts.total}
+            />
+
+            <FilterButton
+              active={activeFilter === "active"}
+              onClick={() => setActiveFilter("active")}
+              label="Yayında"
+              count={counts.active}
+            />
+
+            <FilterButton
+              active={activeFilter === "pending"}
+              onClick={() => setActiveFilter("pending")}
+              label="Onay Bekleyen"
+              count={counts.pending}
+            />
+
+            <FilterButton
+              active={activeFilter === "needs_revision"}
+              onClick={() => setActiveFilter("needs_revision")}
+              label="Düzenleme"
+              count={counts.needs_revision}
+            />
+
+            <FilterButton
+              active={activeFilter === "sold"}
+              onClick={() => setActiveFilter("sold")}
+              label="Satıldı"
+              count={counts.sold}
+            />
+
+            <FilterButton
+              active={activeFilter === "removed"}
+              onClick={() => setActiveFilter("removed")}
+              label="Kaldırıldı"
+              count={counts.removed}
+            />
+          </div>
+        </div>
+
         {listings.length === 0 ? (
+          <EmptyState />
+        ) : filteredListings.length === 0 ? (
           <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-8">
-            <h2 className="text-2xl font-bold">Henüz ilan yok</h2>
+            <h2 className="text-2xl font-black">Bu bölümde ilan yok</h2>
 
-            <p className="mt-3 text-neutral-400">
-              İlk ilanını oluşturduğunda burada görünecek.
+            <p className="mt-3 text-sm leading-7 text-neutral-400">
+              Seçtiğin filtreye ait ilan bulunmuyor. Üstteki filtrelerden
+              başka bir durumu seçebilirsin.
             </p>
-
-            <Link
-              href="/create-listing"
-              className="mt-6 inline-block rounded-full bg-white px-6 py-3 font-semibold text-black hover:bg-neutral-200"
-            >
-              İlk İlanı Oluştur
-            </Link>
           </div>
         ) : (
-          <div className="space-y-5">
-            {listings.map((listing) => {
+          <div className="grid gap-5">
+            {filteredListings.map((listing) => {
               const coverImage = getCoverImage(listing);
               const isActionLoading = actionLoadingId === listing.id;
               const favoriteCount = favoriteCounts[listing.id] ?? 0;
 
               return (
-                <div
+                <article
                   key={listing.id}
-                  className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-4 md:p-5"
+                  className="overflow-hidden rounded-[2rem] border border-neutral-800 bg-neutral-900 p-4 md:p-5"
                 >
-                  <div className="grid gap-5 lg:grid-cols-[180px_1fr]">
-                    <div className="overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-950">
+                  <div className="grid gap-5 lg:grid-cols-[190px_1fr]">
+                    <Link
+                      href={`/listings/${listing.id}`}
+                      className="group overflow-hidden rounded-[1.6rem] border border-neutral-800 bg-neutral-950"
+                    >
                       {coverImage ? (
                         <img
                           src={coverImage}
                           alt={listing.title}
-                          className={`h-52 w-full object-cover lg:h-full ${
+                          className={`h-56 w-full object-cover transition duration-300 group-hover:scale-[1.035] lg:h-full ${
                             listing.status === "sold" ||
                             listing.status === "removed" ||
                             listing.status === "rejected"
@@ -418,11 +560,11 @@ export default function ProfilePage() {
                           }`}
                         />
                       ) : (
-                        <div className="flex h-52 items-center justify-center text-sm text-neutral-600">
+                        <div className="flex h-56 items-center justify-center text-sm text-neutral-600 lg:h-full">
                           Görsel yok
                         </div>
                       )}
-                    </div>
+                    </Link>
 
                     <div className="min-w-0">
                       <div className="mb-3 flex flex-wrap gap-2">
@@ -430,26 +572,28 @@ export default function ProfilePage() {
                           {statusText(listing.status)}
                         </span>
 
-                        <span className="rounded-full bg-neutral-950 px-3 py-1 text-xs text-neutral-300">
+                        <span className="rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1.5 text-xs font-bold text-neutral-300">
                           {categoryText(listing.category)}
                         </span>
 
-                        <span className="rounded-full bg-neutral-950 px-3 py-1 text-xs text-neutral-300">
+                        <span className="rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1.5 text-xs font-bold text-neutral-300">
                           ♥ {favoriteCount} favori
                         </span>
 
                         {listing.ai_public_label && (
-                          <span className="rounded-full bg-blue-950 px-3 py-1 text-xs text-blue-300">
+                          <span className="rounded-full border border-blue-800 bg-blue-950 px-3 py-1.5 text-xs font-bold text-blue-300">
                             {listing.ai_public_label}
                           </span>
                         )}
                       </div>
 
                       <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-                        <div>
-                          <h2 className="text-xl font-black md:text-2xl">
-                            {listing.title}
-                          </h2>
+                        <div className="min-w-0">
+                          <Link href={`/listings/${listing.id}`}>
+                            <h2 className="text-2xl font-black leading-tight tracking-tight hover:text-yellow-100 md:text-3xl">
+                              {listing.title}
+                            </h2>
+                          </Link>
 
                           <p className="mt-2 text-sm text-neutral-500">
                             {listing.club || "Kulüp yok"} •{" "}
@@ -458,7 +602,7 @@ export default function ProfilePage() {
                           </p>
                         </div>
 
-                        <p className="text-2xl font-black">
+                        <p className="shrink-0 text-3xl font-black">
                           {Number(listing.price).toLocaleString("tr-TR")}₺
                         </p>
                       </div>
@@ -475,7 +619,7 @@ export default function ProfilePage() {
 
                       {listing.ai_admin_note && (
                         <div className="mt-5 rounded-3xl border border-yellow-900 bg-yellow-950/40 p-4">
-                          <p className="text-xs font-semibold text-yellow-300">
+                          <p className="text-xs font-black uppercase tracking-[0.18em] text-yellow-300">
                             Admin Notu
                           </p>
 
@@ -487,14 +631,13 @@ export default function ProfilePage() {
 
                       {listing.status === "needs_revision" && (
                         <div className="mt-4 rounded-3xl border border-yellow-800 bg-yellow-950/30 p-4">
-                          <p className="font-bold text-yellow-300">
+                          <p className="font-black text-yellow-300">
                             Bu ilan için düzenleme istendi
                           </p>
 
                           <p className="mt-2 text-sm leading-6 text-yellow-100/80">
-                            Şu anda düzenleme ekranında sadece fiyat ve açıklama
-                            değiştirilebilir. Kaydettiğinde ilan tekrar admin
-                            onayına düşer.
+                            Düzenleme ekranında fiyat ve açıklamayı güncelle.
+                            Kaydettiğinde ilan tekrar admin onayına düşer.
                           </p>
                         </div>
                       )}
@@ -502,7 +645,7 @@ export default function ProfilePage() {
                       <div className="mt-5 flex flex-wrap gap-2">
                         <Link
                           href={`/listings/${listing.id}`}
-                          className="rounded-full border border-neutral-700 px-4 py-2 text-sm hover:bg-neutral-800"
+                          className="rounded-full border border-neutral-700 px-4 py-2 text-sm font-bold text-neutral-300 hover:bg-neutral-800"
                         >
                           Görüntüle
                         </Link>
@@ -512,7 +655,7 @@ export default function ProfilePage() {
                           listing.status === "needs_revision") && (
                           <Link
                             href={`/edit-listing/${listing.id}`}
-                            className="rounded-full border border-yellow-800 bg-yellow-950 px-4 py-2 text-sm text-yellow-300 hover:bg-yellow-900"
+                            className="rounded-full border border-yellow-800 bg-yellow-950 px-4 py-2 text-sm font-bold text-yellow-300 hover:bg-yellow-900"
                           >
                             Fiyat / Açıklama Düzenle
                           </Link>
@@ -522,9 +665,11 @@ export default function ProfilePage() {
                           <button
                             onClick={() => markAsSold(listing)}
                             disabled={isActionLoading}
-                            className="rounded-full border border-purple-800 bg-purple-950 px-4 py-2 text-sm text-purple-300 hover:bg-purple-900 disabled:opacity-50"
+                            className="rounded-full border border-purple-800 bg-purple-950 px-4 py-2 text-sm font-bold text-purple-300 hover:bg-purple-900 disabled:opacity-50"
                           >
-                            Satıldı Olarak İşaretle
+                            {isActionLoading
+                              ? "İşleniyor..."
+                              : "Satıldı Olarak İşaretle"}
                           </button>
                         )}
 
@@ -532,9 +677,11 @@ export default function ProfilePage() {
                           <button
                             onClick={() => removeFromSale(listing)}
                             disabled={isActionLoading}
-                            className="rounded-full border border-neutral-700 px-4 py-2 text-sm hover:bg-neutral-800 disabled:opacity-50"
+                            className="rounded-full border border-neutral-700 px-4 py-2 text-sm font-bold text-neutral-300 hover:bg-neutral-800 disabled:opacity-50"
                           >
-                            Yayından Kaldır
+                            {isActionLoading
+                              ? "İşleniyor..."
+                              : "Yayından Kaldır"}
                           </button>
                         )}
 
@@ -543,9 +690,11 @@ export default function ProfilePage() {
                           <button
                             onClick={() => sendBackToReview(listing)}
                             disabled={isActionLoading}
-                            className="rounded-full border border-blue-800 bg-blue-950 px-4 py-2 text-sm text-blue-300 hover:bg-blue-900 disabled:opacity-50"
+                            className="rounded-full border border-blue-800 bg-blue-950 px-4 py-2 text-sm font-bold text-blue-300 hover:bg-blue-900 disabled:opacity-50"
                           >
-                            Tekrar Onaya Gönder
+                            {isActionLoading
+                              ? "İşleniyor..."
+                              : "Tekrar Onaya Gönder"}
                           </button>
                         )}
 
@@ -554,25 +703,45 @@ export default function ProfilePage() {
                           <button
                             onClick={() => permanentlyDeleteListing(listing)}
                             disabled={isActionLoading}
-                            className="rounded-full border border-red-800 bg-red-950 px-4 py-2 text-sm text-red-300 hover:bg-red-900 disabled:opacity-50"
+                            className="rounded-full border border-red-800 bg-red-950 px-4 py-2 text-sm font-bold text-red-300 hover:bg-red-900 disabled:opacity-50"
                           >
-                            Kalıcı Sil
+                            {isActionLoading ? "İşleniyor..." : "Kalıcı Sil"}
                           </button>
                         )}
                       </div>
 
-                      <p className="mt-4 text-xs text-neutral-600">
-                        {formatDate(listing.created_at)}
+                      <p className="mt-4 text-xs font-medium text-neutral-600">
+                        Oluşturulma: {formatDate(listing.created_at)}
                       </p>
                     </div>
                   </div>
-                </div>
+                </article>
               );
             })}
           </div>
         )}
       </section>
     </main>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-8">
+      <h2 className="text-3xl font-black">Henüz ilan yok</h2>
+
+      <p className="mt-3 max-w-xl text-sm leading-7 text-neutral-400">
+        İlk ilanını oluşturduğunda burada görünecek. Fotoğrafları ekle, ürün
+        bilgilerini gir ve admin kontrolüne gönder.
+      </p>
+
+      <Link
+        href="/create-listing"
+        className="mt-6 inline-block rounded-full bg-white px-6 py-3 text-sm font-black text-black hover:bg-neutral-200"
+      >
+        İlk İlanı Oluştur
+      </Link>
+    </div>
   );
 }
 
@@ -597,9 +766,11 @@ function InfoBox({
 }) {
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
-      <p className="text-xs text-neutral-500">{label}</p>
+      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-neutral-600">
+        {label}
+      </p>
 
-      <p className="mt-1 font-semibold text-neutral-200">
+      <p className="mt-2 text-sm font-bold text-neutral-200">
         {value || "Belirtilmiyor"}
       </p>
     </div>
@@ -608,11 +779,44 @@ function InfoBox({
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-3xl border border-neutral-800 bg-neutral-950 p-5">
-      <p className="text-2xl font-black">{value}</p>
+    <div className="rounded-3xl border border-neutral-800 bg-neutral-950 p-4">
+      <p className="text-3xl font-black">{value}</p>
 
-      <p className="mt-1 text-sm text-neutral-500">{label}</p>
+      <p className="mt-1 text-xs font-bold text-neutral-500">{label}</p>
     </div>
+  );
+}
+
+function FilterButton({
+  active,
+  onClick,
+  label,
+  count,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  count: number;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full border px-4 py-2 text-sm font-black transition ${
+        active
+          ? "border-white bg-white text-black"
+          : "border-neutral-800 bg-neutral-900 text-neutral-300 hover:bg-neutral-800"
+      }`}
+    >
+      {label}
+      <span
+        className={`ml-2 rounded-full px-2 py-0.5 text-xs ${
+          active ? "bg-black/10 text-black" : "bg-neutral-950 text-neutral-400"
+        }`}
+      >
+        {count}
+      </span>
+    </button>
   );
 }
 
@@ -640,33 +844,34 @@ function statusText(status: string) {
 }
 
 function statusClass(status: string) {
-  const baseClass = "rounded-full px-3 py-1 text-xs font-semibold";
+  const baseClass =
+    "rounded-full border px-3 py-1.5 text-xs font-black";
 
   if (status === "active") {
-    return `${baseClass} bg-emerald-950 text-emerald-300`;
+    return `${baseClass} border-emerald-800 bg-emerald-950 text-emerald-300`;
   }
 
   if (status === "pending") {
-    return `${baseClass} bg-blue-950 text-blue-300`;
+    return `${baseClass} border-blue-800 bg-blue-950 text-blue-300`;
   }
 
   if (status === "sold") {
-    return `${baseClass} bg-purple-950 text-purple-300`;
+    return `${baseClass} border-purple-800 bg-purple-950 text-purple-300`;
   }
 
   if (status === "removed") {
-    return `${baseClass} bg-red-950 text-red-300`;
+    return `${baseClass} border-red-900 bg-red-950 text-red-300`;
   }
 
   if (status === "needs_revision") {
-    return `${baseClass} bg-yellow-950 text-yellow-300`;
+    return `${baseClass} border-yellow-800 bg-yellow-950 text-yellow-300`;
   }
 
   if (status === "rejected") {
-    return `${baseClass} bg-red-950 text-red-300`;
+    return `${baseClass} border-red-900 bg-red-950 text-red-300`;
   }
 
-  return `${baseClass} bg-neutral-950 text-neutral-300`;
+  return `${baseClass} border-neutral-800 bg-neutral-950 text-neutral-300`;
 }
 
 function formatDate(dateValue: string) {

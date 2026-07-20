@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 
@@ -33,11 +33,18 @@ type FavoriteItem = {
   listings: FavoriteListing | null;
 };
 
+type FilterKey = "all" | "active" | "sold" | "removed" | "unavailable";
+
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [loading, setLoading] = useState(true);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"info" | "success" | "error">(
+    "info"
+  );
 
   useEffect(() => {
     loadFavorites();
@@ -90,7 +97,7 @@ export default function FavoritesPage() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      setMessage("Favoriler yüklenemedi: " + error.message);
+      showMessage("Favoriler yüklenemedi: " + error.message, "error", false);
       setLoading(false);
       return;
     }
@@ -110,6 +117,22 @@ export default function FavoritesPage() {
     setLoading(false);
   }
 
+  function showMessage(
+    nextMessage: string,
+    nextType: "info" | "success" | "error" = "info",
+    scroll = true
+  ) {
+    setMessage(nextMessage);
+    setMessageType(nextType);
+
+    if (scroll) {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  }
+
   async function removeFavorite(listingId: string) {
     if (!currentUserId) return;
 
@@ -119,6 +142,8 @@ export default function FavoritesPage() {
 
     if (!confirmAction) return;
 
+    setActionLoadingId(listingId);
+
     const { error } = await supabase
       .from("favorites")
       .delete()
@@ -126,7 +151,8 @@ export default function FavoritesPage() {
       .eq("listing_id", listingId);
 
     if (error) {
-      setMessage("Favoriden çıkarılamadı: " + error.message);
+      showMessage("Favoriden çıkarılamadı: " + error.message, "error");
+      setActionLoadingId(null);
       return;
     }
 
@@ -135,80 +161,210 @@ export default function FavoritesPage() {
     );
 
     window.dispatchEvent(new Event("favorites-updated"));
-    setMessage("İlan favorilerden çıkarıldı.");
+    showMessage("İlan favorilerden çıkarıldı.", "success");
+    setActionLoadingId(null);
   }
+
+  const counts = useMemo(() => {
+    return {
+      total: favorites.length,
+      active: favorites.filter(
+        (favorite) => favorite.listings?.status === "active"
+      ).length,
+      sold: favorites.filter((favorite) => favorite.listings?.status === "sold")
+        .length,
+      removed: favorites.filter(
+        (favorite) => favorite.listings?.status === "removed"
+      ).length,
+      unavailable: favorites.filter((favorite) => !favorite.listings).length,
+    };
+  }, [favorites]);
+
+  const filteredFavorites = useMemo(() => {
+    if (activeFilter === "all") return favorites;
+
+    if (activeFilter === "unavailable") {
+      return favorites.filter((favorite) => !favorite.listings);
+    }
+
+    return favorites.filter(
+      (favorite) => favorite.listings?.status === activeFilter
+    );
+  }, [favorites, activeFilter]);
 
   if (loading) {
     return (
       <main className="min-h-screen bg-neutral-950 px-4 py-8 text-white md:px-8">
         <section className="mx-auto max-w-7xl">
-          <p className="text-neutral-400">Favoriler yükleniyor...</p>
+          <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-8">
+            <p className="text-neutral-400">Favoriler yükleniyor...</p>
+          </div>
         </section>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-neutral-950 px-4 py-8 text-white md:px-8">
+    <main className="min-h-screen bg-neutral-950 px-4 py-6 text-white md:px-8 md:py-8">
       <section className="mx-auto max-w-7xl">
-        <div className="mb-8 rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6 md:p-8">
-          <p className="text-sm text-neutral-500">elFormazione</p>
+        <div className="mb-6 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6 md:rounded-[2.4rem] md:p-8">
+            <div className="inline-flex items-center gap-3 rounded-full border border-yellow-800 bg-yellow-950 px-4 py-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-yellow-300" />
 
-          <h1 className="mt-2 text-3xl font-black tracking-tight md:text-5xl">
-            Favorilerim
-          </h1>
+              <span className="text-[11px] font-black uppercase tracking-[0.22em] text-yellow-300">
+                Favorilerim
+              </span>
+            </div>
 
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-neutral-400 md:text-base">
-            Takip ettiğin ilanları burada görebilirsin. Ürün satılsa veya
-            yayından kaldırılsa bile favorilerinde görünmeye devam eder.
-          </p>
+            <h1 className="mt-5 text-4xl font-black leading-[0.95] tracking-tight md:text-5xl">
+              Takip ettiğin ilanlar.
+            </h1>
+
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-400 md:text-base">
+              Beğendiğin ürünleri burada takip edebilirsin. Ürün satılsa veya
+              yayından kaldırılsa bile favorilerinde görünmeye devam eder.
+            </p>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/listings"
+                className="rounded-full bg-white px-6 py-3 text-center text-sm font-black text-black hover:bg-neutral-200"
+              >
+                Marketi Keşfet
+              </Link>
+
+              <Link
+                href="/profile"
+                className="rounded-full border border-neutral-700 px-6 py-3 text-center text-sm font-black text-neutral-300 hover:bg-neutral-800"
+              >
+                Profilime Dön
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6 md:rounded-[2.4rem]">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-neutral-500">
+              Favori Özeti
+            </p>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <StatCard label="Toplam" value={String(counts.total)} />
+              <StatCard label="Yayında" value={String(counts.active)} />
+              <StatCard label="Satıldı" value={String(counts.sold)} />
+              <StatCard label="Kaldırıldı" value={String(counts.removed)} />
+            </div>
+
+            <div className="mt-5 rounded-3xl border border-neutral-800 bg-neutral-950 p-4">
+              <p className="text-sm font-black text-neutral-200">
+                Favori takibi
+              </p>
+
+              <p className="mt-2 text-xs leading-6 text-neutral-500">
+                Satılan ve kaldırılan ürünleri de burada görmeye devam edersin.
+                Böylece takip ettiğin parçaların durumunu kaçırmazsın.
+              </p>
+            </div>
+          </div>
         </div>
 
         {message && (
-          <div className="mb-6 rounded-2xl border border-neutral-800 bg-neutral-900 p-4 text-sm text-neutral-300">
+          <div
+            className={`mb-6 rounded-2xl border p-4 text-sm font-semibold ${
+              messageType === "success"
+                ? "border-emerald-800 bg-emerald-950 text-emerald-300"
+                : messageType === "error"
+                  ? "border-red-900 bg-red-950 text-red-300"
+                  : "border-neutral-800 bg-neutral-900 text-neutral-300"
+            }`}
+          >
             {message}
           </div>
         )}
 
+        <div className="mb-6 overflow-x-auto pb-1">
+          <div className="flex min-w-max gap-2">
+            <FilterButton
+              active={activeFilter === "all"}
+              onClick={() => setActiveFilter("all")}
+              label="Tümü"
+              count={counts.total}
+            />
+
+            <FilterButton
+              active={activeFilter === "active"}
+              onClick={() => setActiveFilter("active")}
+              label="Yayında"
+              count={counts.active}
+            />
+
+            <FilterButton
+              active={activeFilter === "sold"}
+              onClick={() => setActiveFilter("sold")}
+              label="Satıldı"
+              count={counts.sold}
+            />
+
+            <FilterButton
+              active={activeFilter === "removed"}
+              onClick={() => setActiveFilter("removed")}
+              label="Kaldırıldı"
+              count={counts.removed}
+            />
+
+            <FilterButton
+              active={activeFilter === "unavailable"}
+              onClick={() => setActiveFilter("unavailable")}
+              label="Silinmiş"
+              count={counts.unavailable}
+            />
+          </div>
+        </div>
+
         {favorites.length === 0 ? (
+          <EmptyState />
+        ) : filteredFavorites.length === 0 ? (
           <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-8">
-            <h2 className="text-2xl font-bold">Henüz favori ilan yok</h2>
+            <h2 className="text-2xl font-black">Bu bölümde favori yok</h2>
 
-            <p className="mt-3 text-neutral-400">
-              İlanları gezerken beğendiğin ürünleri favorilerine
-              ekleyebilirsin.
+            <p className="mt-3 text-sm leading-7 text-neutral-400">
+              Seçtiğin filtreye ait favori ilan bulunmuyor. Üstteki filtrelerden
+              başka bir durumu seçebilirsin.
             </p>
-
-            <Link
-              href="/listings"
-              className="mt-6 inline-block rounded-full bg-white px-6 py-3 font-semibold text-black hover:bg-neutral-200"
-            >
-              İlanları Keşfet
-            </Link>
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {favorites.map((favorite) => {
+            {filteredFavorites.map((favorite) => {
               const listing = favorite.listings;
+              const isActionLoading = actionLoadingId === favorite.listing_id;
 
               if (!listing) {
                 return (
-                  <div
+                  <article
                     key={favorite.id}
-                    className="rounded-3xl border border-red-900 bg-red-950 p-5 text-red-200"
+                    className="rounded-[2rem] border border-red-900 bg-red-950/65 p-5 text-red-100"
                   >
-                    <h2 className="font-bold">Bu ilan artık görüntülenemiyor</h2>
-                    <p className="mt-2 text-sm text-red-200/80">
-                      İlan kalıcı olarak silinmiş olabilir.
+                    <div className="flex h-48 items-center justify-center rounded-[1.5rem] border border-red-800 bg-red-950 text-center text-sm text-red-200/80">
+                      Bu ilan artık görüntülenemiyor.
+                    </div>
+
+                    <h2 className="mt-5 text-xl font-black">
+                      İlan silinmiş olabilir
+                    </h2>
+
+                    <p className="mt-2 text-sm leading-6 text-red-100/75">
+                      Favorilediğin bu ürün kalıcı olarak silinmiş veya erişime
+                      kapatılmış olabilir.
                     </p>
 
                     <button
                       onClick={() => removeFavorite(favorite.listing_id)}
-                      className="mt-4 rounded-full border border-red-700 px-4 py-2 text-sm hover:bg-red-900"
+                      disabled={isActionLoading}
+                      className="mt-5 rounded-full border border-red-700 px-4 py-2 text-sm font-black text-red-100 hover:bg-red-900 disabled:opacity-50"
                     >
-                      Favoriden Çıkar
+                      {isActionLoading ? "Çıkarılıyor..." : "Favoriden Çıkar"}
                     </button>
-                  </div>
+                  </article>
                 );
               }
 
@@ -217,9 +373,9 @@ export default function FavoritesPage() {
                 listing.status === "sold" || listing.status === "removed";
 
               return (
-                <div
+                <article
                   key={favorite.id}
-                  className="overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900"
+                  className="overflow-hidden rounded-[2rem] border border-neutral-800 bg-neutral-900"
                 >
                   <Link href={`/listings/${listing.id}`}>
                     <div className="relative aspect-[4/5] bg-neutral-950">
@@ -227,7 +383,7 @@ export default function FavoritesPage() {
                         <img
                           src={coverImage}
                           alt={listing.title}
-                          className={`h-full w-full object-cover ${
+                          className={`h-full w-full object-cover transition duration-300 hover:scale-[1.035] ${
                             isPassive ? "opacity-55 grayscale" : ""
                           }`}
                         />
@@ -238,7 +394,7 @@ export default function FavoritesPage() {
                       )}
 
                       <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-                        <span className="rounded-full bg-black/70 px-3 py-1 text-xs text-white backdrop-blur">
+                        <span className="rounded-full bg-black/70 px-3 py-1 text-xs font-black text-white backdrop-blur">
                           {categoryText(listing.category)}
                         </span>
 
@@ -247,8 +403,14 @@ export default function FavoritesPage() {
                         </span>
                       </div>
 
+                      {listing.ai_public_label && (
+                        <div className="absolute right-3 top-3 rounded-full bg-blue-950/90 px-3 py-1 text-xs font-black text-blue-300 backdrop-blur">
+                          {listing.ai_public_label}
+                        </div>
+                      )}
+
                       {isPassive && (
-                        <div className="absolute inset-x-4 bottom-4 rounded-2xl bg-black/80 p-3 text-center text-sm font-bold text-white backdrop-blur">
+                        <div className="absolute inset-x-4 bottom-4 rounded-2xl bg-black/80 p-3 text-center text-sm font-black text-white backdrop-blur">
                           {listing.status === "sold"
                             ? "Bu ürün satıldı"
                             : "Bu ürün yayından kaldırıldı"}
@@ -261,7 +423,7 @@ export default function FavoritesPage() {
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <Link href={`/listings/${listing.id}`}>
-                          <h2 className="line-clamp-2 font-bold leading-5 hover:text-neutral-300">
+                          <h2 className="line-clamp-2 text-base font-black leading-5 hover:text-yellow-100">
                             {listing.title}
                           </h2>
                         </Link>
@@ -272,32 +434,32 @@ export default function FavoritesPage() {
                         </p>
                       </div>
 
-                      <p className="whitespace-nowrap font-black">
+                      <p className="shrink-0 whitespace-nowrap text-lg font-black">
                         {Number(listing.price).toLocaleString("tr-TR")}₺
                       </p>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 text-xs text-neutral-400">
+                    <div className="flex flex-wrap gap-2 text-xs font-bold text-neutral-400">
                       {listing.brand && (
-                        <span className="rounded-full bg-neutral-950 px-3 py-1">
+                        <span className="rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1">
                           {listing.brand}
                         </span>
                       )}
 
                       {listing.size && (
-                        <span className="rounded-full bg-neutral-950 px-3 py-1">
+                        <span className="rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1">
                           {listing.size}
                         </span>
                       )}
 
                       {listing.condition && (
-                        <span className="rounded-full bg-neutral-950 px-3 py-1">
+                        <span className="rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1">
                           {listing.condition}
                         </span>
                       )}
 
                       {listing.city && (
-                        <span className="rounded-full bg-neutral-950 px-3 py-1">
+                        <span className="rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1">
                           {listing.city}
                         </span>
                       )}
@@ -306,34 +468,59 @@ export default function FavoritesPage() {
                     {isPassive && (
                       <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-950 p-3 text-xs leading-5 text-neutral-400">
                         {listing.status === "sold"
-                          ? "Favorilediğin bu ürün satıldı. Benzer ürünler için satıcının diğer ilanlarını inceleyebilir veya mesajlarını takip edebilirsin."
-                          : "Favorilediğin bu ürün yayından kaldırıldı. Satıcı benzer ürünler ekleyebilir; diğer ilanları takip edebilirsin."}
+                          ? "Favorilediğin bu ürün satıldı. Benzer ürünler için marketi takip edebilirsin."
+                          : "Favorilediğin bu ürün yayından kaldırıldı. Satıcı ürünü tekrar onaya gönderebilir veya benzer ürünler ekleyebilir."}
                       </div>
                     )}
 
                     <div className="mt-4 flex items-center justify-between gap-3 border-t border-neutral-800 pt-4 text-sm">
                       <Link
                         href={`/listings/${listing.id}`}
-                        className="font-medium text-white hover:text-neutral-300"
+                        className="font-black text-white hover:text-yellow-100"
                       >
                         İlanı Gör →
                       </Link>
 
                       <button
                         onClick={() => removeFavorite(listing.id)}
-                        className="rounded-full border border-red-800 bg-red-950 px-3 py-2 text-xs text-red-300 hover:bg-red-900"
+                        disabled={isActionLoading}
+                        className="rounded-full border border-red-800 bg-red-950 px-3 py-2 text-xs font-black text-red-300 hover:bg-red-900 disabled:opacity-50"
                       >
-                        Favoriden Çıkar
+                        {isActionLoading ? "Çıkarılıyor..." : "Çıkar"}
                       </button>
                     </div>
+
+                    <p className="mt-3 text-[11px] font-medium text-neutral-600">
+                      Favoriye eklenme: {formatDate(favorite.created_at)}
+                    </p>
                   </div>
-                </div>
+                </article>
               );
             })}
           </div>
         )}
       </section>
     </main>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-8">
+      <h2 className="text-3xl font-black">Henüz favori ilan yok</h2>
+
+      <p className="mt-3 max-w-xl text-sm leading-7 text-neutral-400">
+        İlanları gezerken beğendiğin ürünleri favorilerine ekleyebilirsin.
+        Favoriye aldığın ürünler burada takip edilir.
+      </p>
+
+      <Link
+        href="/listings"
+        className="mt-6 inline-block rounded-full bg-white px-6 py-3 text-sm font-black text-black hover:bg-neutral-200"
+      >
+        İlanları Keşfet
+      </Link>
+    </div>
   );
 }
 
@@ -347,6 +534,49 @@ function getCoverImage(listing: FavoriteListing) {
   );
 
   return sortedImages[0]?.image_url ?? null;
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-3xl border border-neutral-800 bg-neutral-950 p-4">
+      <p className="text-3xl font-black">{value}</p>
+
+      <p className="mt-1 text-xs font-bold text-neutral-500">{label}</p>
+    </div>
+  );
+}
+
+function FilterButton({
+  active,
+  onClick,
+  label,
+  count,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  count: number;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full border px-4 py-2 text-sm font-black transition ${
+        active
+          ? "border-white bg-white text-black"
+          : "border-neutral-800 bg-neutral-900 text-neutral-300 hover:bg-neutral-800"
+      }`}
+    >
+      {label}
+      <span
+        className={`ml-2 rounded-full px-2 py-0.5 text-xs ${
+          active ? "bg-black/10 text-black" : "bg-neutral-950 text-neutral-400"
+        }`}
+      >
+        {count}
+      </span>
+    </button>
+  );
 }
 
 function categoryText(category: string) {
@@ -374,31 +604,41 @@ function statusText(status: string) {
 
 function statusClass(status: string) {
   const baseClass =
-    "rounded-full px-3 py-1 text-xs font-semibold backdrop-blur";
+    "rounded-full border px-3 py-1 text-xs font-black backdrop-blur";
 
   if (status === "active") {
-    return `${baseClass} bg-emerald-950/90 text-emerald-300`;
+    return `${baseClass} border-emerald-800 bg-emerald-950/90 text-emerald-300`;
   }
 
   if (status === "sold") {
-    return `${baseClass} bg-purple-950/90 text-purple-300`;
+    return `${baseClass} border-purple-800 bg-purple-950/90 text-purple-300`;
   }
 
   if (status === "removed") {
-    return `${baseClass} bg-red-950/90 text-red-300`;
+    return `${baseClass} border-red-900 bg-red-950/90 text-red-300`;
   }
 
   if (status === "pending") {
-    return `${baseClass} bg-blue-950/90 text-blue-300`;
+    return `${baseClass} border-blue-800 bg-blue-950/90 text-blue-300`;
   }
 
   if (status === "needs_revision") {
-    return `${baseClass} bg-yellow-950/90 text-yellow-300`;
+    return `${baseClass} border-yellow-800 bg-yellow-950/90 text-yellow-300`;
   }
 
   if (status === "rejected") {
-    return `${baseClass} bg-red-950/90 text-red-300`;
+    return `${baseClass} border-red-900 bg-red-950/90 text-red-300`;
   }
 
-  return `${baseClass} bg-neutral-950/90 text-neutral-300`;
+  return `${baseClass} border-neutral-800 bg-neutral-950/90 text-neutral-300`;
+}
+
+function formatDate(dateValue: string) {
+  return new Date(dateValue).toLocaleString("tr-TR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }

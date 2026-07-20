@@ -62,6 +62,9 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"info" | "success" | "error">(
+    "info"
+  );
 
   useEffect(() => {
     checkAdminAndLoadListings();
@@ -111,7 +114,7 @@ export default function AdminPage() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      setMessage("İlanlar yüklenemedi: " + error.message);
+      showMessage("İlanlar yüklenemedi: " + error.message, "error", false);
       setLoading(false);
       return;
     }
@@ -124,6 +127,22 @@ export default function AdminPage() {
 
     setListings(listingData);
     setLoading(false);
+  }
+
+  function showMessage(
+    nextMessage: string,
+    nextType: "info" | "success" | "error" = "info",
+    scroll = true
+  ) {
+    setMessage(nextMessage);
+    setMessageType(nextType);
+
+    if (scroll) {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
   }
 
   async function updateListingStatusWithOwnerNotification({
@@ -148,7 +167,10 @@ export default function AdminPage() {
     successMessage: string;
   }) {
     setActionLoadingId(listing.id);
-    setMessage("İlan güncelleniyor ve ilan sahibine bildirim gönderiliyor...");
+    showMessage(
+      "İlan güncelleniyor ve ilan sahibine bildirim gönderiliyor...",
+      "info"
+    );
 
     const { error } = await supabase.rpc(
       "admin_update_listing_status_and_notify_owner",
@@ -165,7 +187,7 @@ export default function AdminPage() {
     );
 
     if (error) {
-      setMessage("İşlem tamamlanamadı: " + error.message);
+      showMessage("İşlem tamamlanamadı: " + error.message, "error");
       setActionLoadingId(null);
       return;
     }
@@ -187,7 +209,7 @@ export default function AdminPage() {
 
     window.dispatchEvent(new Event("notifications-updated"));
 
-    setMessage(successMessage);
+    showMessage(successMessage, "success");
     setActionLoadingId(null);
   }
 
@@ -286,6 +308,25 @@ export default function AdminPage() {
     setSearchText("");
   }
 
+  const counts = useMemo(() => {
+    return {
+      total: listings.length,
+      pending: listings.filter((listing) => listing.status === "pending")
+        .length,
+      active: listings.filter((listing) => listing.status === "active").length,
+      revision: listings.filter(
+        (listing) => listing.status === "needs_revision"
+      ).length,
+      rejected: listings.filter((listing) => listing.status === "rejected")
+        .length,
+      sold: listings.filter((listing) => listing.status === "sold").length,
+      removed: listings.filter((listing) => listing.status === "removed")
+        .length,
+      manual: listings.filter((listing) => listing.requires_manual_review)
+        .length,
+    };
+  }, [listings]);
+
   const filteredListings = useMemo(() => {
     let result = [...listings];
 
@@ -310,6 +351,8 @@ export default function AdminPage() {
           listing.description,
           listing.ai_admin_note,
           listing.ai_public_label,
+          listing.id,
+          listing.user_id,
         ]
           .filter(Boolean)
           .join(" ")
@@ -322,27 +365,13 @@ export default function AdminPage() {
     return result;
   }, [listings, selectedStatus, searchText]);
 
-  const pendingCount = listings.filter(
-    (listing) => listing.status === "pending"
-  ).length;
-
-  const activeCount = listings.filter(
-    (listing) => listing.status === "active"
-  ).length;
-
-  const revisionCount = listings.filter(
-    (listing) => listing.status === "needs_revision"
-  ).length;
-
-  const removedCount = listings.filter(
-    (listing) => listing.status === "removed"
-  ).length;
-
   if (loading) {
     return (
       <main className="min-h-screen bg-neutral-950 px-4 py-8 text-white md:px-8">
         <section className="mx-auto max-w-7xl">
-          <p className="text-neutral-400">Admin panel yükleniyor...</p>
+          <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-8">
+            <p className="text-neutral-400">Admin panel yükleniyor...</p>
+          </div>
         </section>
       </main>
     );
@@ -352,15 +381,15 @@ export default function AdminPage() {
     return (
       <main className="min-h-screen bg-neutral-950 px-4 py-8 text-white md:px-8">
         <section className="mx-auto max-w-3xl rounded-[2rem] border border-neutral-800 bg-neutral-900 p-8">
-          <h1 className="text-2xl font-black">Yetkisiz erişim</h1>
+          <h1 className="text-3xl font-black">Yetkisiz erişim</h1>
 
-          <p className="mt-3 text-neutral-400">
+          <p className="mt-3 text-sm leading-7 text-neutral-400">
             Bu sayfaya sadece admin kullanıcıları erişebilir.
           </p>
 
           <Link
             href="/profile"
-            className="mt-6 inline-block rounded-full bg-white px-6 py-3 font-semibold text-black hover:bg-neutral-200"
+            className="mt-6 inline-block rounded-full bg-white px-6 py-3 text-sm font-black text-black hover:bg-neutral-200"
           >
             Profile Dön
           </Link>
@@ -370,58 +399,103 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-950 px-4 py-8 text-white md:px-8">
+    <main className="min-h-screen bg-neutral-950 px-4 py-6 text-white md:px-8 md:py-8">
       <section className="mx-auto max-w-7xl">
-        <div className="mb-8 rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6 md:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-sm text-neutral-500">elFormazione Admin</p>
+        <div className="mb-6 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6 md:rounded-[2.4rem] md:p-8">
+            <div className="inline-flex items-center gap-3 rounded-full border border-yellow-800 bg-yellow-950 px-4 py-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-yellow-300" />
 
-              <h1 className="mt-2 text-3xl font-black tracking-tight md:text-5xl">
-                İlan Onay Paneli
-              </h1>
-
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-neutral-400 md:text-base">
-                Bekleyen, güncellenmiş, yayındaki ve kaldırılmış ilanları buradan
-                kontrol edebilirsin. Admin işlemlerinde ilan sahibine otomatik
-                bildirim gider.
-              </p>
+              <span className="text-[11px] font-black uppercase tracking-[0.22em] text-yellow-300">
+                elFormazione Admin
+              </span>
             </div>
 
-            <Link
-              href="/profile"
-              className="rounded-full border border-neutral-700 px-6 py-3 text-center font-semibold hover:bg-neutral-800"
-            >
-              Profile Dön
-            </Link>
+            <h1 className="mt-5 text-4xl font-black leading-[0.95] tracking-tight md:text-5xl">
+              İlan onay paneli.
+            </h1>
+
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-400 md:text-base">
+              Bekleyen, güncellenmiş, yayındaki ve kaldırılmış ilanları buradan
+              kontrol edebilirsin. Admin işlemlerinde ilan sahibine otomatik
+              bildirim gider.
+            </p>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/profile"
+                className="rounded-full bg-white px-6 py-3 text-center text-sm font-black text-black hover:bg-neutral-200"
+              >
+                Profile Dön
+              </Link>
+
+              <Link
+                href="/admin/announcements"
+                className="rounded-full border border-neutral-700 px-6 py-3 text-center text-sm font-black text-neutral-300 hover:bg-neutral-800"
+              >
+                Duyurular
+              </Link>
+
+              <Link
+                href="/admin/analytics"
+                className="rounded-full border border-neutral-700 px-6 py-3 text-center text-sm font-black text-neutral-300 hover:bg-neutral-800"
+              >
+                İstatistikler
+              </Link>
+            </div>
           </div>
 
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Onay Bekleyen" value={String(pendingCount)} />
-            <StatCard label="Yayında" value={String(activeCount)} />
-            <StatCard label="Düzenleme Gerekli" value={String(revisionCount)} />
-            <StatCard label="Kaldırılan" value={String(removedCount)} />
+          <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6 md:rounded-[2.4rem]">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-neutral-500">
+              Admin Özeti
+            </p>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <StatCard label="Toplam" value={String(counts.total)} />
+              <StatCard label="Onay Bekleyen" value={String(counts.pending)} />
+              <StatCard label="Yayında" value={String(counts.active)} />
+              <StatCard label="Manuel Kontrol" value={String(counts.manual)} />
+            </div>
+
+            <div className="mt-5 rounded-3xl border border-neutral-800 bg-neutral-950 p-4">
+              <p className="text-sm font-black text-neutral-200">
+                Kontrol notu
+              </p>
+
+              <p className="mt-2 text-xs leading-6 text-neutral-500">
+                Onay, reddetme ve düzenleme isteği işlemleri ilan sahibine
+                otomatik bildirim gönderir.
+              </p>
+            </div>
           </div>
         </div>
 
         {message && (
-          <div className="mb-6 rounded-2xl border border-neutral-800 bg-neutral-900 p-4 text-sm text-neutral-300">
+          <div
+            className={`mb-6 rounded-2xl border p-4 text-sm font-semibold ${
+              messageType === "success"
+                ? "border-emerald-800 bg-emerald-950 text-emerald-300"
+                : messageType === "error"
+                  ? "border-red-900 bg-red-950 text-red-300"
+                  : "border-neutral-800 bg-neutral-900 text-neutral-300"
+            }`}
+          >
             {message}
           </div>
         )}
 
-        <div className="mb-5 grid gap-3 lg:grid-cols-[1fr_260px]">
+        <div className="mb-5 grid gap-3 lg:grid-cols-[1fr_280px]">
           <input
             value={searchText}
             onChange={(event) => setSearchText(event.target.value)}
-            placeholder="İlan, kulüp, marka, şehir, not ara..."
-            className="w-full rounded-full border border-neutral-800 bg-neutral-900 px-5 py-3 text-sm outline-none placeholder:text-neutral-600 focus:border-neutral-500"
+            placeholder="İlan, kulüp, marka, şehir, not, ilan ID veya kullanıcı ID ara..."
+            className="w-full rounded-full border border-neutral-800 bg-neutral-900 px-5 py-3 text-sm font-semibold outline-none placeholder:text-neutral-600 focus:border-neutral-500"
           />
 
           <select
             value={selectedStatus}
             onChange={(event) => setSelectedStatus(event.target.value)}
-            className="w-full rounded-full border border-neutral-800 bg-neutral-900 px-5 py-3 text-sm outline-none focus:border-neutral-500"
+            className="w-full rounded-full border border-neutral-800 bg-neutral-900 px-5 py-3 text-sm font-semibold outline-none focus:border-neutral-500"
           >
             {statusFilterOptions.map((status) => (
               <option key={status.key} value={status.key}>
@@ -431,7 +505,60 @@ export default function AdminPage() {
           </select>
         </div>
 
-        <div className="mb-6 flex flex-col gap-2 text-sm text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-6 overflow-x-auto pb-1">
+          <div className="flex min-w-max gap-2">
+            <FilterButton
+              active={selectedStatus === "all"}
+              onClick={() => setSelectedStatus("all")}
+              label="Tümü"
+              count={counts.total}
+            />
+
+            <FilterButton
+              active={selectedStatus === "pending"}
+              onClick={() => setSelectedStatus("pending")}
+              label="Onay Bekleyen"
+              count={counts.pending}
+            />
+
+            <FilterButton
+              active={selectedStatus === "active"}
+              onClick={() => setSelectedStatus("active")}
+              label="Yayında"
+              count={counts.active}
+            />
+
+            <FilterButton
+              active={selectedStatus === "needs_revision"}
+              onClick={() => setSelectedStatus("needs_revision")}
+              label="Düzenleme"
+              count={counts.revision}
+            />
+
+            <FilterButton
+              active={selectedStatus === "rejected"}
+              onClick={() => setSelectedStatus("rejected")}
+              label="Reddedilen"
+              count={counts.rejected}
+            />
+
+            <FilterButton
+              active={selectedStatus === "sold"}
+              onClick={() => setSelectedStatus("sold")}
+              label="Satıldı"
+              count={counts.sold}
+            />
+
+            <FilterButton
+              active={selectedStatus === "removed"}
+              onClick={() => setSelectedStatus("removed")}
+              label="Kaldırılan"
+              count={counts.removed}
+            />
+          </div>
+        </div>
+
+        <div className="mb-6 flex flex-col gap-2 text-sm font-bold text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
           <p>{filteredListings.length} ilan gösteriliyor</p>
 
           {(searchText || selectedStatus !== "all") && (
@@ -446,14 +573,14 @@ export default function AdminPage() {
 
         {filteredListings.length === 0 ? (
           <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-8">
-            <h2 className="text-2xl font-bold">İlan bulunamadı</h2>
+            <h2 className="text-2xl font-black">İlan bulunamadı</h2>
 
-            <p className="mt-3 text-neutral-400">
+            <p className="mt-3 text-sm leading-7 text-neutral-400">
               Seçili filtrelere uygun ilan yok.
             </p>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="grid gap-5">
             {filteredListings.map((listing) => {
               const coverImage = getCoverImage(listing);
               const updateSource = listing.details?.source ?? "";
@@ -462,24 +589,33 @@ export default function AdminPage() {
               const isActionLoading = actionLoadingId === listing.id;
 
               return (
-                <div
+                <article
                   key={listing.id}
-                  className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-4 md:p-5"
+                  className="overflow-hidden rounded-[2rem] border border-neutral-800 bg-neutral-900 p-4 md:p-5"
                 >
-                  <div className="grid gap-5 lg:grid-cols-[190px_1fr]">
-                    <div className="overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-950">
+                  <div className="grid gap-5 lg:grid-cols-[210px_1fr]">
+                    <Link
+                      href={`/listings/${listing.id}`}
+                      className="group overflow-hidden rounded-[1.6rem] border border-neutral-800 bg-neutral-950"
+                    >
                       {coverImage ? (
                         <img
                           src={coverImage}
                           alt={listing.title}
-                          className="h-52 w-full object-cover lg:h-full"
+                          className={`h-60 w-full object-cover transition duration-300 group-hover:scale-[1.035] lg:h-full ${
+                            listing.status === "sold" ||
+                            listing.status === "removed" ||
+                            listing.status === "rejected"
+                              ? "opacity-60 grayscale"
+                              : ""
+                          }`}
                         />
                       ) : (
-                        <div className="flex h-52 items-center justify-center text-sm text-neutral-600">
+                        <div className="flex h-60 items-center justify-center text-sm text-neutral-600 lg:h-full">
                           Görsel yok
                         </div>
                       )}
-                    </div>
+                    </Link>
 
                     <div className="min-w-0">
                       <div className="mb-3 flex flex-wrap gap-2">
@@ -487,34 +623,42 @@ export default function AdminPage() {
                           {statusText(listing.status)}
                         </span>
 
-                        <span className="rounded-full bg-neutral-950 px-3 py-1 text-xs text-neutral-300">
+                        <span className="rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1.5 text-xs font-bold text-neutral-300">
                           {categoryText(listing.category)}
                         </span>
 
                         {isPriceDescriptionEdit && (
-                          <span className="rounded-full bg-yellow-950 px-3 py-1 text-xs font-semibold text-yellow-300">
+                          <span className="rounded-full border border-yellow-800 bg-yellow-950 px-3 py-1.5 text-xs font-bold text-yellow-300">
                             Fiyat / açıklama güncellemesi
                           </span>
                         )}
 
                         {listing.originality_declaration && (
-                          <span className="rounded-full bg-emerald-950 px-3 py-1 text-xs text-emerald-300">
+                          <span className="rounded-full border border-emerald-800 bg-emerald-950 px-3 py-1.5 text-xs font-bold text-emerald-300">
                             Orijinallik beyanı var
                           </span>
                         )}
 
                         {listing.requires_manual_review && (
-                          <span className="rounded-full bg-blue-950 px-3 py-1 text-xs text-blue-300">
+                          <span className="rounded-full border border-blue-800 bg-blue-950 px-3 py-1.5 text-xs font-bold text-blue-300">
                             Manuel kontrol gerekli
+                          </span>
+                        )}
+
+                        {listing.ai_public_label && (
+                          <span className="rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1.5 text-xs font-bold text-neutral-300">
+                            {listing.ai_public_label}
                           </span>
                         )}
                       </div>
 
                       <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                         <div className="min-w-0">
-                          <h2 className="text-xl font-black md:text-2xl">
-                            {listing.title}
-                          </h2>
+                          <Link href={`/listings/${listing.id}`}>
+                            <h2 className="text-2xl font-black leading-tight tracking-tight hover:text-yellow-100 md:text-3xl">
+                              {listing.title}
+                            </h2>
+                          </Link>
 
                           <p className="mt-2 text-sm text-neutral-500">
                             {listing.club || "Kulüp yok"} •{" "}
@@ -523,7 +667,7 @@ export default function AdminPage() {
                           </p>
                         </div>
 
-                        <p className="text-2xl font-black">
+                        <p className="shrink-0 text-3xl font-black">
                           {Number(listing.price).toLocaleString("tr-TR")}₺
                         </p>
                       </div>
@@ -538,23 +682,59 @@ export default function AdminPage() {
                         />
                       </div>
 
-                      <div className="mt-5 rounded-3xl border border-neutral-800 bg-neutral-950 p-4">
-                        <p className="text-xs font-semibold text-neutral-500">
-                          Açıklama
-                        </p>
+                      <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_320px]">
+                        <div className="rounded-3xl border border-neutral-800 bg-neutral-950 p-4">
+                          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-neutral-600">
+                            Açıklama
+                          </p>
 
-                        <p className="mt-2 whitespace-pre-line text-sm leading-6 text-neutral-300">
-                          {listing.description || "Açıklama yok."}
-                        </p>
+                          <p className="mt-2 whitespace-pre-line text-sm leading-7 text-neutral-300">
+                            {listing.description || "Açıklama yok."}
+                          </p>
+                        </div>
+
+                        <div className="rounded-3xl border border-neutral-800 bg-neutral-950 p-4">
+                          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-neutral-600">
+                            Teknik Bilgi
+                          </p>
+
+                          <div className="mt-3 space-y-2 text-xs leading-5 text-neutral-400">
+                            <p>
+                              <span className="text-neutral-600">İlan ID:</span>{" "}
+                              {listing.id}
+                            </p>
+
+                            <p>
+                              <span className="text-neutral-600">
+                                Kullanıcı ID:
+                              </span>{" "}
+                              {listing.user_id}
+                            </p>
+
+                            <p>
+                              <span className="text-neutral-600">
+                                Oluşturma:
+                              </span>{" "}
+                              {formatDate(listing.created_at)}
+                            </p>
+
+                            <p>
+                              <span className="text-neutral-600">
+                                Doğrulama:
+                              </span>{" "}
+                              {listing.verification_status || "Yok"}
+                            </p>
+                          </div>
+                        </div>
                       </div>
 
                       {listing.ai_admin_note && (
                         <div className="mt-4 rounded-3xl border border-yellow-900 bg-yellow-950/40 p-4">
-                          <p className="text-xs font-semibold text-yellow-300">
+                          <p className="text-xs font-black uppercase tracking-[0.18em] text-yellow-300">
                             Admin Notu
                           </p>
 
-                          <p className="mt-2 text-sm leading-6 text-yellow-100">
+                          <p className="mt-2 whitespace-pre-line text-sm leading-7 text-yellow-100">
                             {listing.ai_admin_note}
                           </p>
                         </div>
@@ -563,7 +743,7 @@ export default function AdminPage() {
                       <div className="mt-5 flex flex-wrap gap-2">
                         <Link
                           href={`/listings/${listing.id}`}
-                          className="rounded-full border border-neutral-700 px-4 py-2 text-sm hover:bg-neutral-800"
+                          className="rounded-full border border-neutral-700 px-4 py-2 text-sm font-bold text-neutral-300 hover:bg-neutral-800"
                         >
                           İlanı Gör
                         </Link>
@@ -572,9 +752,11 @@ export default function AdminPage() {
                           <button
                             onClick={() => approveListing(listing)}
                             disabled={isActionLoading}
-                            className="rounded-full border border-emerald-800 bg-emerald-950 px-4 py-2 text-sm text-emerald-300 hover:bg-emerald-900 disabled:opacity-50"
+                            className="rounded-full border border-emerald-800 bg-emerald-950 px-4 py-2 text-sm font-bold text-emerald-300 hover:bg-emerald-900 disabled:opacity-50"
                           >
-                            Onayla ve Yayına Al
+                            {isActionLoading
+                              ? "İşleniyor..."
+                              : "Onayla ve Yayına Al"}
                           </button>
                         )}
 
@@ -582,9 +764,11 @@ export default function AdminPage() {
                           <button
                             onClick={() => requestRevision(listing)}
                             disabled={isActionLoading}
-                            className="rounded-full border border-yellow-800 bg-yellow-950 px-4 py-2 text-sm text-yellow-300 hover:bg-yellow-900 disabled:opacity-50"
+                            className="rounded-full border border-yellow-800 bg-yellow-950 px-4 py-2 text-sm font-bold text-yellow-300 hover:bg-yellow-900 disabled:opacity-50"
                           >
-                            Düzenleme İste
+                            {isActionLoading
+                              ? "İşleniyor..."
+                              : "Düzenleme İste"}
                           </button>
                         )}
 
@@ -592,9 +776,9 @@ export default function AdminPage() {
                           <button
                             onClick={() => rejectListing(listing)}
                             disabled={isActionLoading}
-                            className="rounded-full border border-red-800 bg-red-950 px-4 py-2 text-sm text-red-300 hover:bg-red-900 disabled:opacity-50"
+                            className="rounded-full border border-red-800 bg-red-950 px-4 py-2 text-sm font-bold text-red-300 hover:bg-red-900 disabled:opacity-50"
                           >
-                            Reddet
+                            {isActionLoading ? "İşleniyor..." : "Reddet"}
                           </button>
                         )}
 
@@ -602,20 +786,17 @@ export default function AdminPage() {
                           <button
                             onClick={() => removeListing(listing)}
                             disabled={isActionLoading}
-                            className="rounded-full border border-neutral-700 px-4 py-2 text-sm hover:bg-neutral-800 disabled:opacity-50"
+                            className="rounded-full border border-neutral-700 px-4 py-2 text-sm font-bold text-neutral-300 hover:bg-neutral-800 disabled:opacity-50"
                           >
-                            Yayından Kaldır
+                            {isActionLoading
+                              ? "İşleniyor..."
+                              : "Yayından Kaldır"}
                           </button>
                         )}
                       </div>
-
-                      <p className="mt-4 text-xs text-neutral-600">
-                        İlan ID: {listing.id} • Kullanıcı ID: {listing.user_id} •{" "}
-                        {formatDate(listing.created_at)}
-                      </p>
                     </div>
                   </div>
-                </div>
+                </article>
               );
             })}
           </div>
@@ -646,9 +827,11 @@ function InfoBox({
 }) {
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
-      <p className="text-xs text-neutral-500">{label}</p>
+      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-neutral-600">
+        {label}
+      </p>
 
-      <p className="mt-1 font-semibold text-neutral-200">
+      <p className="mt-2 text-sm font-bold text-neutral-200">
         {value || "Belirtilmiyor"}
       </p>
     </div>
@@ -657,11 +840,44 @@ function InfoBox({
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-3xl border border-neutral-800 bg-neutral-950 p-5">
-      <p className="text-2xl font-black">{value}</p>
+    <div className="rounded-3xl border border-neutral-800 bg-neutral-950 p-4">
+      <p className="text-3xl font-black">{value}</p>
 
-      <p className="mt-1 text-sm text-neutral-500">{label}</p>
+      <p className="mt-1 text-xs font-bold text-neutral-500">{label}</p>
     </div>
+  );
+}
+
+function FilterButton({
+  active,
+  onClick,
+  label,
+  count,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  count: number;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full border px-4 py-2 text-sm font-black transition ${
+        active
+          ? "border-white bg-white text-black"
+          : "border-neutral-800 bg-neutral-900 text-neutral-300 hover:bg-neutral-800"
+      }`}
+    >
+      {label}
+      <span
+        className={`ml-2 rounded-full px-2 py-0.5 text-xs ${
+          active ? "bg-black/10 text-black" : "bg-neutral-950 text-neutral-400"
+        }`}
+      >
+        {count}
+      </span>
+    </button>
   );
 }
 
@@ -689,33 +905,33 @@ function statusText(status: string) {
 }
 
 function statusClass(status: string) {
-  const baseClass = "rounded-full px-3 py-1 text-xs font-semibold";
+  const baseClass = "rounded-full border px-3 py-1.5 text-xs font-black";
 
   if (status === "active") {
-    return `${baseClass} bg-emerald-950 text-emerald-300`;
+    return `${baseClass} border-emerald-800 bg-emerald-950 text-emerald-300`;
   }
 
   if (status === "pending") {
-    return `${baseClass} bg-blue-950 text-blue-300`;
+    return `${baseClass} border-blue-800 bg-blue-950 text-blue-300`;
   }
 
   if (status === "sold") {
-    return `${baseClass} bg-purple-950 text-purple-300`;
+    return `${baseClass} border-purple-800 bg-purple-950 text-purple-300`;
   }
 
   if (status === "removed") {
-    return `${baseClass} bg-red-950 text-red-300`;
+    return `${baseClass} border-red-900 bg-red-950 text-red-300`;
   }
 
   if (status === "needs_revision") {
-    return `${baseClass} bg-yellow-950 text-yellow-300`;
+    return `${baseClass} border-yellow-800 bg-yellow-950 text-yellow-300`;
   }
 
   if (status === "rejected") {
-    return `${baseClass} bg-red-950 text-red-300`;
+    return `${baseClass} border-red-900 bg-red-950 text-red-300`;
   }
 
-  return `${baseClass} bg-neutral-950 text-neutral-300`;
+  return `${baseClass} border-neutral-800 bg-neutral-950 text-neutral-300`;
 }
 
 function formatDate(dateValue: string) {

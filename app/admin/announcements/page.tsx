@@ -1,8 +1,7 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { supabase } from "../../../lib/supabase";
 
 type Announcement = {
@@ -21,6 +20,11 @@ type Announcement = {
   created_at: string;
 };
 
+const MAX_IMAGE_SIZE_MB = 6;
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+
+type FilterKey = "all" | "active" | "passive" | "home" | "global";
+
 export default function AdminAnnouncementsPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
@@ -28,7 +32,12 @@ export default function AdminAnnouncementsPage() {
   const [saving, setSaving] = useState(false);
 
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
+
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"info" | "success" | "error">(
+    "info"
+  );
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -40,10 +49,25 @@ export default function AdminAnnouncementsPage() {
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState("");
 
   useEffect(() => {
     checkAdminAndLoad();
   }, []);
+
+  useEffect(() => {
+    if (!imageFile) {
+      setPreviewUrl("");
+      return;
+    }
+
+    const url = URL.createObjectURL(imageFile);
+    setPreviewUrl(url);
+
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [imageFile]);
 
   async function checkAdminAndLoad() {
     setCheckingAdmin(true);
@@ -57,7 +81,7 @@ export default function AdminAnnouncementsPage() {
       setIsAdmin(false);
       setCheckingAdmin(false);
       setLoading(false);
-      setMessage("Bu sayfayı görüntülemek için giriş yapmalısın.");
+      showMessage("Bu sayfayı görüntülemek için giriş yapmalısın.", "error", false);
       return;
     }
 
@@ -68,7 +92,7 @@ export default function AdminAnnouncementsPage() {
       .maybeSingle();
 
     if (adminError) {
-      setMessage("Admin kontrolü yapılamadı: " + adminError.message);
+      showMessage("Admin kontrolü yapılamadı: " + adminError.message, "error", false);
       setIsAdmin(false);
       setCheckingAdmin(false);
       setLoading(false);
@@ -76,7 +100,7 @@ export default function AdminAnnouncementsPage() {
     }
 
     if (!adminData) {
-      setMessage("Bu sayfayı görüntülemek için admin yetkisi gerekli.");
+      showMessage("Bu sayfayı görüntülemek için admin yetkisi gerekli.", "error", false);
       setIsAdmin(false);
       setCheckingAdmin(false);
       setLoading(false);
@@ -94,10 +118,11 @@ export default function AdminAnnouncementsPage() {
     const { data, error } = await supabase
       .from("announcements")
       .select("*")
+      .order("priority", { ascending: false })
       .order("created_at", { ascending: false });
 
     if (error) {
-      setMessage("Duyurular alınamadı: " + error.message);
+      showMessage("Duyurular alınamadı: " + error.message, "error", false);
     } else {
       setAnnouncements((data ?? []) as Announcement[]);
     }
@@ -105,19 +130,59 @@ export default function AdminAnnouncementsPage() {
     setLoading(false);
   }
 
+  function showMessage(
+    nextMessage: string,
+    nextType: "info" | "success" | "error" = "info",
+    scroll = true
+  ) {
+    setMessage(nextMessage);
+    setMessageType(nextType);
+
+    if (scroll) {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  }
+
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
+
+    if (!file) {
+      setImageFile(null);
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      showMessage("Sadece görsel dosyası yükleyebilirsin.", "error");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      showMessage(
+        `Duyuru görseli en fazla ${MAX_IMAGE_SIZE_MB}MB olabilir.`,
+        "error"
+      );
+      event.target.value = "";
+      return;
+    }
+
     setImageFile(file);
+    event.target.value = "";
   }
 
   async function uploadImage(file: File) {
     const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const safeName = file.name
-      .replace(/\s+/g, "-")
-      .replace(/[^a-zA-Z0-9.-]/g, "")
-      .toLowerCase();
 
-    const filePath = `${Date.now()}-${safeName || `announcement.${fileExt}`}`;
+    const safeName =
+      file.name
+        .replace(/\s+/g, "-")
+        .replace(/[^a-zA-Z0-9.-]/g, "")
+        .toLowerCase() || `announcement.${fileExt}`;
+
+    const filePath = `${Date.now()}-${safeName}`;
 
     const { error: uploadError } = await supabase.storage
       .from("announcement-images")
@@ -141,7 +206,17 @@ export default function AdminAnnouncementsPage() {
     event.preventDefault();
 
     if (!title.trim()) {
-      setMessage("Duyuru başlığı zorunlu.");
+      showMessage("Duyuru başlığı zorunlu.", "error");
+      return;
+    }
+
+    if (startsAt && endsAt && new Date(startsAt) >= new Date(endsAt)) {
+      showMessage("Bitiş tarihi başlangıç tarihinden sonra olmalı.", "error");
+      return;
+    }
+
+    if (buttonLink.trim() && !buttonLink.trim().startsWith("/")) {
+      showMessage("Buton linki site içi olmalı. Örn: /create-listing", "error");
       return;
     }
 
@@ -175,17 +250,18 @@ export default function AdminAnnouncementsPage() {
       });
 
       if (error) {
-        setMessage("Duyuru eklenemedi: " + error.message);
+        showMessage("Duyuru eklenemedi: " + error.message, "error");
       } else {
-        setMessage("Duyuru başarıyla eklendi.");
+        showMessage("Duyuru başarıyla eklendi.", "success");
         resetForm();
         await loadAnnouncements();
       }
     } catch (error) {
-      setMessage(
+      showMessage(
         error instanceof Error
           ? "Görsel yüklenemedi: " + error.message
-          : "Duyuru eklenirken bilinmeyen hata oluştu."
+          : "Duyuru eklenirken bilinmeyen hata oluştu.",
+        "error"
       );
     }
 
@@ -203,6 +279,7 @@ export default function AdminAnnouncementsPage() {
     setStartsAt("");
     setEndsAt("");
     setImageFile(null);
+    setPreviewUrl("");
   }
 
   async function toggleActive(announcement: Announcement) {
@@ -217,8 +294,12 @@ export default function AdminAnnouncementsPage() {
       .eq("id", announcement.id);
 
     if (error) {
-      setMessage("Duyuru güncellenemedi: " + error.message);
+      showMessage("Duyuru güncellenemedi: " + error.message, "error");
     } else {
+      showMessage(
+        announcement.is_active ? "Duyuru pasifleştirildi." : "Duyuru aktif yapıldı.",
+        "success"
+      );
       await loadAnnouncements();
     }
   }
@@ -228,24 +309,63 @@ export default function AdminAnnouncementsPage() {
 
     if (!confirmed) return;
 
-    const { error } = await supabase
-      .from("announcements")
-      .delete()
-      .eq("id", id);
+    const secondConfirm = window.confirm(
+      "Son kez onayla: Duyuru kalıcı olarak silinecek."
+    );
+
+    if (!secondConfirm) return;
+
+    const { error } = await supabase.from("announcements").delete().eq("id", id);
 
     if (error) {
-      setMessage("Duyuru silinemedi: " + error.message);
+      showMessage("Duyuru silinemedi: " + error.message, "error");
     } else {
-      setMessage("Duyuru silindi.");
+      showMessage("Duyuru silindi.", "success");
       await loadAnnouncements();
     }
   }
+
+  const counts = useMemo(() => {
+    return {
+      total: announcements.length,
+      active: announcements.filter((item) => item.is_active).length,
+      passive: announcements.filter((item) => !item.is_active).length,
+      home: announcements.filter((item) => item.placement === "home").length,
+      global: announcements.filter((item) => item.placement === "global").length,
+    };
+  }, [announcements]);
+
+  const filteredAnnouncements = useMemo(() => {
+    if (activeFilter === "all") return announcements;
+
+    if (activeFilter === "active") {
+      return announcements.filter((announcement) => announcement.is_active);
+    }
+
+    if (activeFilter === "passive") {
+      return announcements.filter((announcement) => !announcement.is_active);
+    }
+
+    if (activeFilter === "home") {
+      return announcements.filter((announcement) => announcement.placement === "home");
+    }
+
+    if (activeFilter === "global") {
+      return announcements.filter(
+        (announcement) => announcement.placement === "global"
+      );
+    }
+
+    return announcements;
+  }, [announcements, activeFilter]);
 
   if (checkingAdmin || loading) {
     return (
       <main className="min-h-screen bg-neutral-950 px-4 py-8 text-white md:px-8">
         <section className="mx-auto max-w-7xl">
-          <p className="text-neutral-400">Duyuru paneli yükleniyor...</p>
+          <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-8">
+            <p className="text-neutral-400">Duyuru paneli yükleniyor...</p>
+          </div>
         </section>
       </main>
     );
@@ -261,7 +381,7 @@ export default function AdminAnnouncementsPage() {
 
           <Link
             href="/"
-            className="mt-6 inline-block rounded-full bg-white px-6 py-3 text-sm font-bold text-black hover:bg-neutral-200"
+            className="mt-6 inline-block rounded-full bg-white px-6 py-3 text-sm font-black text-black hover:bg-neutral-200"
           >
             Ana Sayfaya Dön
           </Link>
@@ -271,51 +391,134 @@ export default function AdminAnnouncementsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-950 px-4 py-8 text-white md:px-8">
+    <main className="min-h-screen bg-neutral-950 px-4 py-6 text-white md:px-8 md:py-8">
       <section className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-sm text-neutral-500">Admin Paneli</p>
+        <div className="mb-6 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6 md:rounded-[2.4rem] md:p-8">
+            <div className="inline-flex items-center gap-3 rounded-full border border-yellow-800 bg-yellow-950 px-4 py-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-yellow-300" />
 
-            <h1 className="mt-2 text-4xl font-black tracking-tight md:text-6xl">
-              Duyurular
+              <span className="text-[11px] font-black uppercase tracking-[0.22em] text-yellow-300">
+                Admin Duyurular
+              </span>
+            </div>
+
+            <h1 className="mt-5 text-4xl font-black leading-[0.95] tracking-tight md:text-5xl">
+              Duyuruları yönet.
             </h1>
 
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-400">
-              Ana sayfada veya tüm sitede gösterilecek yazılı/görselli
-              duyuruları buradan yönetebilirsin.
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-400 md:text-base">
+              Ana sayfada veya tüm sitede gösterilecek görselli/yazılı
+              duyuruları buradan oluşturabilir, aktif/pasif yapabilir ve
+              silebilirsin.
             </p>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/admin"
+                className="rounded-full bg-white px-6 py-3 text-center text-sm font-black text-black hover:bg-neutral-200"
+              >
+                Admin Panel
+              </Link>
+
+              <button
+                onClick={loadAnnouncements}
+                className="rounded-full border border-neutral-700 px-6 py-3 text-center text-sm font-black text-neutral-300 hover:bg-neutral-800"
+              >
+                Yenile
+              </button>
+            </div>
           </div>
 
-          <div className="flex gap-3">
-            <Link
-              href="/admin"
-              className="rounded-full border border-neutral-800 px-5 py-3 text-sm font-bold text-neutral-300 hover:bg-neutral-900 hover:text-white"
-            >
-              Admin Panel
-            </Link>
+          <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6 md:rounded-[2.4rem]">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-neutral-500">
+              Duyuru Özeti
+            </p>
 
-            <button
-              onClick={loadAnnouncements}
-              className="rounded-full bg-white px-5 py-3 text-sm font-bold text-black hover:bg-neutral-200"
-            >
-              Yenile
-            </button>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <StatCard label="Toplam" value={String(counts.total)} />
+              <StatCard label="Aktif" value={String(counts.active)} />
+              <StatCard label="Ana Sayfa" value={String(counts.home)} />
+              <StatCard label="Tüm Site" value={String(counts.global)} />
+            </div>
+
+            <div className="mt-5 rounded-3xl border border-neutral-800 bg-neutral-950 p-4">
+              <p className="text-sm font-black text-neutral-200">
+                Görsel önerisi
+              </p>
+
+              <p className="mt-2 text-xs leading-6 text-neutral-500">
+                Duyuru görsellerini 9:16 veya geniş kompozisyonlu yükleyebilirsin.
+                Mobilde görsel arka plan gibi kullanılacağı için ortadaki yazılar
+                boşluklu olursa daha iyi görünür.
+              </p>
+            </div>
           </div>
         </div>
 
         {message && (
-          <div className="mb-6 rounded-2xl border border-neutral-800 bg-neutral-900 p-4 text-sm text-neutral-300">
+          <div
+            className={`mb-6 rounded-2xl border p-4 text-sm font-semibold ${
+              messageType === "success"
+                ? "border-emerald-800 bg-emerald-950 text-emerald-300"
+                : messageType === "error"
+                  ? "border-red-900 bg-red-950 text-red-300"
+                  : "border-neutral-800 bg-neutral-900 text-neutral-300"
+            }`}
+          >
             {message}
           </div>
         )}
 
+        <div className="mb-6 overflow-x-auto pb-1">
+          <div className="flex min-w-max gap-2">
+            <FilterButton
+              active={activeFilter === "all"}
+              onClick={() => setActiveFilter("all")}
+              label="Tümü"
+              count={counts.total}
+            />
+
+            <FilterButton
+              active={activeFilter === "active"}
+              onClick={() => setActiveFilter("active")}
+              label="Aktif"
+              count={counts.active}
+            />
+
+            <FilterButton
+              active={activeFilter === "passive"}
+              onClick={() => setActiveFilter("passive")}
+              label="Pasif"
+              count={counts.passive}
+            />
+
+            <FilterButton
+              active={activeFilter === "home"}
+              onClick={() => setActiveFilter("home")}
+              label="Ana Sayfa"
+              count={counts.home}
+            />
+
+            <FilterButton
+              active={activeFilter === "global"}
+              onClick={() => setActiveFilter("global")}
+              label="Tüm Site"
+              count={counts.global}
+            />
+          </div>
+        </div>
+
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <form
             onSubmit={handleCreateAnnouncement}
-            className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6"
+            className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-5 md:p-6"
           >
             <h2 className="text-2xl font-black">Yeni Duyuru Ekle</h2>
+
+            <p className="mt-2 text-sm leading-7 text-neutral-500">
+              Başlık zorunlu. Görsel, açıklama ve buton alanları isteğe bağlıdır.
+            </p>
 
             <div className="mt-6 space-y-4">
               <Field label="Başlık">
@@ -331,23 +534,53 @@ export default function AdminAnnouncementsPage() {
                 <textarea
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
-                  className="input-style min-h-28 resize-none"
+                  className="input-style min-h-32 resize-none"
                   placeholder="İlk 100 satıcı için ücretsiz listeleme ve özel rozet dönemi başladı."
                 />
               </Field>
 
               <Field label="Duyuru görseli">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="input-style"
-                />
+                <label className="flex cursor-pointer flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-neutral-700 bg-neutral-950 px-5 py-7 text-center hover:border-neutral-500">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
 
-                {imageFile && (
-                  <p className="mt-2 text-xs text-neutral-500">
-                    Seçilen görsel: {imageFile.name}
-                  </p>
+                  <span className="text-3xl">🖼️</span>
+
+                  <span className="mt-3 text-sm font-black text-white">
+                    Görsel seç
+                  </span>
+
+                  <span className="mt-2 text-xs leading-6 text-neutral-500">
+                    En fazla {MAX_IMAGE_SIZE_MB}MB görsel yükleyebilirsin.
+                  </span>
+                </label>
+
+                {previewUrl && (
+                  <div className="mt-4 overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950">
+                    <img
+                      src={previewUrl}
+                      alt="Duyuru önizleme"
+                      className="h-56 w-full object-cover"
+                    />
+
+                    <div className="flex items-center justify-between gap-3 p-3">
+                      <p className="truncate text-xs font-bold text-neutral-400">
+                        {imageFile?.name}
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() => setImageFile(null)}
+                        className="rounded-full border border-red-800 bg-red-950 px-3 py-2 text-xs font-black text-red-300 hover:bg-red-900"
+                      >
+                        Kaldır
+                      </button>
+                    </div>
+                  </div>
                 )}
               </Field>
 
@@ -368,6 +601,10 @@ export default function AdminAnnouncementsPage() {
                     className="input-style"
                     placeholder="/create-listing"
                   />
+
+                  <p className="mt-2 text-xs text-neutral-500">
+                    Site içi link kullan. Örn: /listings, /create-listing
+                  </p>
                 </Field>
               </div>
 
@@ -439,94 +676,117 @@ export default function AdminAnnouncementsPage() {
             </div>
           </form>
 
-          <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-6">
+          <div className="rounded-[2rem] border border-neutral-800 bg-neutral-900 p-5 md:p-6">
             <h2 className="text-2xl font-black">Mevcut Duyurular</h2>
 
+            <p className="mt-2 text-sm leading-7 text-neutral-500">
+              Aktif duyurular ana sayfadaki duyuru alanında öncelik sırasına göre
+              görünür.
+            </p>
+
             <div className="mt-6 space-y-4">
-              {announcements.length === 0 && (
-                <p className="text-sm text-neutral-500">
-                  Henüz duyuru eklenmemiş.
-                </p>
+              {filteredAnnouncements.length === 0 && (
+                <div className="rounded-3xl border border-neutral-800 bg-neutral-950 p-6">
+                  <p className="text-sm text-neutral-500">
+                    Bu filtreye uygun duyuru yok.
+                  </p>
+                </div>
               )}
 
-              {announcements.map((announcement) => (
-                <div
+              {filteredAnnouncements.map((announcement) => (
+                <article
                   key={announcement.id}
-                  className="overflow-hidden rounded-[1.5rem] border border-neutral-800 bg-neutral-950"
+                  className="overflow-hidden rounded-[1.7rem] border border-neutral-800 bg-neutral-950"
                 >
                   {announcement.image_url && (
-                    <div className="relative h-44 w-full">
-                      <Image
+                    <div className="h-52 w-full bg-neutral-900">
+                      <img
                         src={announcement.image_url}
                         alt={announcement.title}
-                        fill
-                        className="object-cover"
-                        sizes="600px"
+                        className="h-full w-full object-cover"
                       />
                     </div>
                   )}
 
                   <div className="p-5">
-                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                      <div>
-                        <div className="flex flex-wrap gap-2">
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-black ${
-                              announcement.is_active
-                                ? "bg-emerald-950 text-emerald-300"
-                                : "bg-red-950 text-red-300"
-                            }`}
-                          >
-                            {announcement.is_active ? "Aktif" : "Pasif"}
-                          </span>
+                    <div className="flex flex-wrap gap-2">
+                      <span
+                        className={`rounded-full border px-3 py-1 text-xs font-black ${
+                          announcement.is_active
+                            ? "border-emerald-800 bg-emerald-950 text-emerald-300"
+                            : "border-red-900 bg-red-950 text-red-300"
+                        }`}
+                      >
+                        {announcement.is_active ? "Aktif" : "Pasif"}
+                      </span>
 
-                          <span className="rounded-full border border-neutral-800 px-3 py-1 text-xs font-bold text-neutral-400">
-                            {announcement.placement === "global"
-                              ? "Tüm site"
-                              : "Ana sayfa"}
-                          </span>
+                      <span className="rounded-full border border-neutral-800 px-3 py-1 text-xs font-bold text-neutral-400">
+                        {announcement.placement === "global"
+                          ? "Tüm site"
+                          : "Ana sayfa"}
+                      </span>
 
-                          <span className="rounded-full border border-neutral-800 px-3 py-1 text-xs font-bold text-neutral-400">
-                            Öncelik: {announcement.priority}
-                          </span>
-                        </div>
+                      <span className="rounded-full border border-neutral-800 px-3 py-1 text-xs font-bold text-neutral-400">
+                        {typeText(announcement.announcement_type)}
+                      </span>
 
-                        <h3 className="mt-4 text-xl font-black">
-                          {announcement.title}
-                        </h3>
-
-                        {announcement.description && (
-                          <p className="mt-2 text-sm leading-7 text-neutral-400">
-                            {announcement.description}
-                          </p>
-                        )}
-
-                        {announcement.button_text && (
-                          <p className="mt-3 text-xs text-neutral-500">
-                            Buton: {announcement.button_text} →{" "}
-                            {announcement.button_link || "/listings"}
-                          </p>
-                        )}
-                      </div>
+                      <span className="rounded-full border border-neutral-800 px-3 py-1 text-xs font-bold text-neutral-400">
+                        Öncelik: {announcement.priority}
+                      </span>
                     </div>
+
+                    <h3 className="mt-4 text-xl font-black">
+                      {announcement.title}
+                    </h3>
+
+                    {announcement.description && (
+                      <p className="mt-2 text-sm leading-7 text-neutral-400">
+                        {announcement.description}
+                      </p>
+                    )}
+
+                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                      <InfoBox
+                        label="Buton"
+                        value={
+                          announcement.button_text
+                            ? `${announcement.button_text} → ${
+                                announcement.button_link || "/listings"
+                              }`
+                            : "Yok"
+                        }
+                      />
+
+                      <InfoBox
+                        label="Tarih"
+                        value={dateRangeText(
+                          announcement.starts_at,
+                          announcement.ends_at
+                        )}
+                      />
+                    </div>
+
+                    <p className="mt-4 text-xs font-medium text-neutral-600">
+                      Oluşturulma: {formatDate(announcement.created_at)}
+                    </p>
 
                     <div className="mt-5 flex flex-col gap-2 sm:flex-row">
                       <button
                         onClick={() => toggleActive(announcement)}
-                        className="rounded-full border border-neutral-800 px-5 py-3 text-sm font-bold text-neutral-300 hover:bg-neutral-900 hover:text-white"
+                        className="rounded-full border border-neutral-800 px-5 py-3 text-sm font-black text-neutral-300 hover:bg-neutral-900 hover:text-white"
                       >
                         {announcement.is_active ? "Pasifleştir" : "Aktif Yap"}
                       </button>
 
                       <button
                         onClick={() => deleteAnnouncement(announcement.id)}
-                        className="rounded-full border border-red-900 px-5 py-3 text-sm font-bold text-red-300 hover:bg-red-950"
+                        className="rounded-full border border-red-900 bg-red-950 px-5 py-3 text-sm font-black text-red-300 hover:bg-red-900"
                       >
                         Sil
                       </button>
                     </div>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           </div>
@@ -545,11 +805,90 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-bold text-neutral-300">
+      <span className="mb-2 block text-sm font-black text-neutral-300">
         {label}
       </span>
 
       {children}
     </label>
   );
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-3xl border border-neutral-800 bg-neutral-950 p-4">
+      <p className="text-3xl font-black">{value}</p>
+
+      <p className="mt-1 text-xs font-bold text-neutral-500">{label}</p>
+    </div>
+  );
+}
+
+function FilterButton({
+  active,
+  onClick,
+  label,
+  count,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  count: number;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full border px-4 py-2 text-sm font-black transition ${
+        active
+          ? "border-white bg-white text-black"
+          : "border-neutral-800 bg-neutral-900 text-neutral-300 hover:bg-neutral-800"
+      }`}
+    >
+      {label}
+      <span
+        className={`ml-2 rounded-full px-2 py-0.5 text-xs ${
+          active ? "bg-black/10 text-black" : "bg-neutral-950 text-neutral-400"
+        }`}
+      >
+        {count}
+      </span>
+    </button>
+  );
+}
+
+function InfoBox({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-4">
+      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-neutral-600">
+        {label}
+      </p>
+
+      <p className="mt-2 text-sm font-bold text-neutral-300">{value}</p>
+    </div>
+  );
+}
+
+function typeText(type: string) {
+  if (type === "campaign") return "Kampanya";
+  if (type === "maintenance") return "Bakım";
+  if (type === "launch") return "Lansman";
+  return "Bilgi";
+}
+
+function dateRangeText(startsAt: string | null, endsAt: string | null) {
+  if (!startsAt && !endsAt) return "Süresiz";
+  if (startsAt && !endsAt) return `${formatDate(startsAt)} itibarıyla`;
+  if (!startsAt && endsAt) return `${formatDate(endsAt)} tarihine kadar`;
+  return `${formatDate(startsAt as string)} - ${formatDate(endsAt as string)}`;
+}
+
+function formatDate(dateValue: string) {
+  return new Date(dateValue).toLocaleString("tr-TR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
